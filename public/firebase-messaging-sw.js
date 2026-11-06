@@ -31,7 +31,7 @@ self.addEventListener('notificationclick', (e) => {
 });
 
 /* App shell: lets the system be installed to the home screen and still open with a weak connection. */
-const SHELL = 'weehong-shell-v1';
+const SHELL = 'weehong-shell-v2';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(SHELL).then((c) => c.addAll(['/', '/icon-192.png']))); });
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', (e) => {

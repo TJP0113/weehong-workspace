@@ -28,7 +28,7 @@ export default function PrintWorksheet() {
     <div className="print-page" style={{ maxWidth: 794, margin: '0 auto', padding: '40px 48px', fontFamily: "'Noto Sans SC', Arial, sans-serif", display: 'flex', flexDirection: 'column', gap: 16, minHeight: '100vh' }}>
       <div className="noprint" style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}><button className="btn" type="button" onClick={() => window.print()}>打印 / 存成 PDF</button></div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-        <div><div style={{ fontSize: '18pt', fontWeight: 700 }}>{general.companyName}</div><div style={{ fontSize: '10.5pt', color: '#444' }}>{[general.companyAddress, general.companyPhone].filter(Boolean).join(' · ')}</div></div>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}><img src="/logo-color.png" alt="WEE HONG" style={{ height: 56 }} /><div><div style={{ fontSize: '18pt', fontWeight: 700 }}>{general.companyName}</div><div style={{ fontSize: '10.5pt', color: '#444' }}>{[general.companyAddress, general.companyPhone].filter(Boolean).join(' · ')}</div></div></div>
         <div style={{ textAlign: 'right' }}><div style={{ fontSize: '16pt', fontWeight: 700 }}>JOB SHEET 工作表</div><div style={{ fontSize: '12pt', fontWeight: 700 }}>{ws.no}</div><div style={{ fontSize: '10.5pt', color: '#444' }}>类型：{wsTypeLabel(ws.type)}</div></div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px 28px' }}>

@@ -43,7 +43,11 @@ h3 { font-size: 1.05rem; }
 .shell { min-height: 100vh; padding: 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
 .side { flex: 1 1 220px; max-width: 100%; display: flex; flex-direction: column; gap: 20px; position: sticky; top: 24px; }
 .main { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px; }
-.brand { display: flex; align-items: center; gap: 10px; font-size: 0.87rem; font-weight: 700; letter-spacing: 0.12em; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand img { height: 52px; width: auto; display: block; }
+.logo-light { display: none !important; }
+[data-theme='light'] .logo-light { display: block !important; }
+[data-theme='light'] .logo-dark { display: none !important; }
 .me { display: flex; align-items: center; gap: 12px; }
 .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--grey-bg); display: grid; place-items: center; font-weight: 600; flex: none; }
 .avatar.sm { width: 32px; height: 32px; font-size: 0.87rem; }

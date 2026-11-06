@@ -10,7 +10,7 @@ function Frame({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24 }}>
       <section className="card" style={{ width: '100%', maxWidth: 460, padding: '40px 36px', gap: 24, border: '1px solid var(--line2)' }}>
-        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--accent)', display: 'grid', placeItems: 'center', color: '#fff' }}><Icon name="wrench" size={26} /></div>
+        <div className="brand"><img className="logo-dark" src="/logo-white.png" alt="WEE HONG" style={{ height: 72 }} /><img className="logo-light" src="/logo-color.png" alt="WEE HONG" style={{ height: 72 }} /></div>
         {children}
       </section>
     </div>

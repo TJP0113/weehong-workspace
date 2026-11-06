@@ -76,7 +76,10 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="shell" data-lang={prefs.lang}>
       <aside className="side">
-        <div className="brand"><Icon name="wrench" size={22} /><span>{general.companyName && !general.companyName.startsWith('[') ? general.companyName : '维修工作表'}</span></div>
+        <Link to="/" className="brand" aria-label={`${general.companyName} · 我的工作`}>
+          <img className="logo-dark" src="/logo-white.png" alt="WEE HONG" />
+          <img className="logo-light" src="/logo-color.png" alt="WEE HONG" />
+        </Link>
         <div className="me">
           <div className="avatar">{initial(staff?.name)}</div>
           <div className="two" style={{ flex: 1 }}><b className="ell">{staff?.name}</b><span>{t(roleLabel(role || ''))}{DEMO ? ' · 示范' : ''}</span></div>

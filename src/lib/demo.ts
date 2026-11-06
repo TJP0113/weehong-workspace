@@ -29,7 +29,7 @@ export function demoSeed(): Record<string, any> {
   D['settings/statuses'] = { list: DEFAULT_STATUSES };
   D['settings/positions'] = { list: DEFAULT_POSITIONS };
   D['settings/permissions'] = DEFAULT_PERMISSIONS;
-  D['settings/general'] = { ...DEFAULT_GENERAL, companyName: '[公司名称]（示范）', depotAddress: 'Tebrau, Johor Bahru', vehicles: ['公司货车 JQT 2210', '拖车 JRB 5503'] };
+  D['settings/general'] = { ...DEFAULT_GENERAL, companyName: 'WEE HONG', depotAddress: 'Tebrau, Johor Bahru', vehicles: ['公司货车 JQT 2210', '拖车 JRB 5503'] };
   D['settings/integrations'] = {
     autocount: { configured: false, lastRun: null, lastSuccess: null, lastError: null },
     google: { connected: false },

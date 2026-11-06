@@ -37,7 +37,7 @@ export const DEFAULT_POSITIONS: PositionGroup[] = [
 ];
 
 export const DEFAULT_GENERAL: GeneralSettings = {
-  companyName: '[公司名称]',
+  companyName: 'WEE HONG',
   companyAddress: '',
   companyPhone: '',
   depotAddress: 'Johor Bahru, Johor',
