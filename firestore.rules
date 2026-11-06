@@ -1,0 +1,89 @@
+rules_version = '2';
+// 权限：只有“人员名单”(users) 里、active=true 的 Google 账号可以读写。
+// 细项权限（谁能建表、谁能检查）由系统按“设置 · 人员与角色”控制；这里再挡住最重要的几项。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function email() { return request.auth.token.email.lower(); }
+    function me() { return get(/databases/$(database)/documents/users/$(email())).data; }
+    function staff() { return request.auth != null && request.auth.token.email_verified == true
+      && exists(/databases/$(database)/documents/users/$(email())) && me().active == true; }
+    function role() { return me().role; }
+    function isAdmin() { return staff() && role() == 'admin'; }
+    function roleIn(list) { return staff() && role() in list; }
+    function only(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+
+    match /users/{id} {
+      allow read: if staff() || (request.auth != null && id == email());
+      allow create, delete: if isAdmin();
+      // 自己只能更新登录时间和通知偏好；其余由管理员改
+      allow update: if isAdmin() || (staff() && id == email() && only(['lastLogin', 'notify']));
+    }
+    match /settings/{id} {
+      allow read: if staff();
+      allow write: if isAdmin();
+    }
+    match /counters/{id} {
+      allow read, write: if staff();
+    }
+    match /customers/{id} {
+      allow read: if staff();
+      allow write: if isAdmin();
+    }
+    match /parts/{id} {
+      allow read: if staff();
+      // 零件由后端从 AutoCount 同步；管理员只可改位置区分和分类
+      allow update: if isAdmin() && only(['groups', 'category']);
+      allow create, delete: if false;
+    }
+    match /machines/{id} {
+      allow read: if staff();
+      // 机械本身来自 AutoCount；系统内只改状态、地点、租期、保养
+      allow update: if staff() && only(['status', 'location', 'client', 'rentStart', 'rentEnd', 'rate', 'nextMaintenance']);
+      allow create, delete: if false;
+      match /renewals/{r} {
+        allow read: if staff();
+        allow create, delete: if staff();
+      }
+    }
+    match /worksheets/{id} {
+      allow read: if staff();
+      allow create: if roleIn(['admin', 'warehouse']);
+      allow update: if staff() && (
+        // 结案和检查结果只有管理员可以写
+        isAdmin() || (request.resource.data.status != 'closed' && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['review']))
+      );
+      allow delete: if isAdmin();
+      match /{sub}/{doc} {
+        allow read: if staff();
+        allow write: if staff();
+      }
+    }
+    match /rentalOrders/{id} {
+      allow read: if staff();
+      allow create: if staff();
+      allow update: if staff();
+      allow delete: if isAdmin();
+    }
+    match /inspections/{id} {
+      allow read: if staff();
+      allow create, update: if staff();
+      allow delete: if isAdmin();
+    }
+    match /trips/{id} {
+      allow read: if staff();
+      allow create, update: if staff();
+      allow delete: if isAdmin();
+    }
+    match /notifications/{id} {
+      allow read: if staff() && (resource.data.to == email() || resource.data.to == role() + '@role');
+      allow create: if staff();
+      // 只能把自己标为已读
+      allow update: if staff() && only(['readBy']) && request.resource.data.readBy.hasAll(resource.data.readBy)
+        && request.resource.data.readBy.removeAll(resource.data.readBy).hasOnly([email()]);
+    }
+    match /pushTokens/{id} {
+      allow create, update: if staff() && request.resource.data.email == email();
+      allow read, delete: if false;
+    }
+  }
+}

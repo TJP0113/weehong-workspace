@@ -1,0 +1,29 @@
+name = "weehong-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# 定时任务（时间是 UTC；马来西亚时间 = UTC+8）
+[triggers]
+crons = ["* * * * *", "*/15 * * * *", "0 0 * * *"]
+
+# 第 3 步建立 KV 后，把 id 换成你的 KV ID
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_YOUR_KV_ID"
+
+[vars]
+FIREBASE_PROJECT_ID = "REPLACE_WITH_FIREBASE_PROJECT_ID"
+# 系统网页网址（Cloudflare Pages 给的网址）
+APP_URL = "https://weehong-workspace.pages.dev"
+# AutoCount AOTG：拿到 AOTG 文档后填写（留空 = 不同步）
+AUTOCOUNT_BASE_URL = ""
+AUTOCOUNT_AUTH_PATH = "/api/public/v1/Authenticate"
+AUTOCOUNT_ITEMS_PATH = "/api/public/v1/StockItem/GetStockItem"
+AUTOCOUNT_DEBTORS_PATH = "/api/public/v1/Debtor/GetDebtor"
+# AutoCount 里属于“机械”的物料组（Item Group），用逗号分开；这些物料会进入机械租赁，而不是零件库
+AUTOCOUNT_MACHINE_GROUPS = "MACHINE"
+
+# 机密变量（用 Cloudflare 网页或 `wrangler secret put` 设定，不写在这里）：
+# FIREBASE_SERVICE_ACCOUNT  ← Firebase 服务账号 JSON 的全部内容
+# GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET  ← Google Drive / 日历用的 OAuth 客户端
+# AUTOCOUNT_API_KEY / AUTOCOUNT_USERNAME / AUTOCOUNT_PASSWORD
