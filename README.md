@@ -38,27 +38,26 @@
 9. 项目设置 → 云消息传递 → 网络推送证书 → 生成密钥对，记下密钥（VAPID）。
 10. 项目设置 → 服务账号 → 生成新的私钥（JSON）。**这个文件是数据库总钥匙，只贴到 Cloudflare 机密变量，不要传给任何人。**
 
-### 2. Cloudflare Pages（网页）
+### 2. Cloudflare（网页）
 
-1. https://dash.cloudflare.com → Workers 和 Pages → 建立 → **Pages** → 连接到 Git → 授权 GitHub → 选 `TJP0113/weehong-workspace`。
-2. 构建设置：框架预设 **Vite**，构建命令 `npm run build`，输出目录 `dist`。
-3. 环境变量：
-   - 想先看示范：只加 `VITE_DEMO` = `1`。
-   - 接上 Firebase：删掉 `VITE_DEMO`，加入
-     `VITE_FIREBASE_API_KEY`、`VITE_FIREBASE_AUTH_DOMAIN`、`VITE_FIREBASE_PROJECT_ID`、`VITE_FIREBASE_STORAGE_BUCKET`、`VITE_FIREBASE_MESSAGING_SENDER_ID`、`VITE_FIREBASE_APP_ID`、`VITE_FIREBASE_VAPID_KEY`、`VITE_API_URL`（第 3 步的 Worker 网址）。
-4. 部署后得到网址，例如 `https://weehong-workspace.pages.dev`。
-5. 回到 Firebase → Authentication → 设置 → **已授权的网域** → 加入这个网址（不含 https://）。
+1. https://dash.cloudflare.com → Workers 和 Pages → 建立 → 导入存储库 → 授权 GitHub → 选 `TJP0113/weehong-workspace`。
+2. 项目名称 `weehong-workspace`，构建命令 `npm run build`，部署命令 `npx wrangler deploy`（仓库根目录的 `wrangler.jsonc` 已设定好）。
+3. 没有填 Firebase 变量时，网页自动以**示范模式**运行，可以先部署来看。
+4. 接上 Firebase：到这个项目 → 设置 → 构建 → **构建变量**，加入
+   `VITE_FIREBASE_API_KEY`、`VITE_FIREBASE_AUTH_DOMAIN`、`VITE_FIREBASE_PROJECT_ID`、`VITE_FIREBASE_STORAGE_BUCKET`、`VITE_FIREBASE_MESSAGING_SENDER_ID`、`VITE_FIREBASE_APP_ID`、`VITE_FIREBASE_VAPID_KEY`、`VITE_API_URL`（第 3 步的后端网址），然后重新部署。
+5. 部署后得到网址，例如 `https://weehong-workspace.<你的账号>.workers.dev`。
+6. 回到 Firebase → Authentication → 设置 → **已授权的网域** → 加入这个网址（不含 https://）。
 
-改了环境变量后，要在 Pages → 部署 → 重新部署一次才会生效。
+（也可以改用 Cloudflare Pages：构建命令 `npm run build`，输出目录 `dist`，变量相同。）
 
 ### 3. Cloudflare Worker（后端）
 
 1. Workers 和 Pages → **KV** → 建立命名空间 `weehong-kv`，记下 ID。
 2. 打开 `worker/wrangler.toml`，填入：KV 的 `id`、`FIREBASE_PROJECT_ID`、`APP_URL`（第 2 步网页网址）。提交到 GitHub。
-3. Workers 和 Pages → 建立 → **Workers** → 导入存储库 → 选这个仓库，**根目录填 `worker`**，部署命令 `npx wrangler deploy`。
+3. Workers 和 Pages → 建立 → 导入存储库 → 再选这个仓库一次，项目名称 `weehong-api`，**根目录（Root directory）填 `worker`**，构建命令留空，部署命令 `npx wrangler deploy`。
 4. Worker → 设置 → 变量和机密 → 新增**机密**：
    - `FIREBASE_SERVICE_ACCOUNT` = 服务账号 JSON 文件的**全部内容**
-5. 记下 Worker 网址（例如 `https://weehong-api.<你的账号>.workers.dev`），填到 Pages 的 `VITE_API_URL`，重新部署网页。
+5. 记下后端网址（例如 `https://weehong-api.<你的账号>.workers.dev`），填到网页项目的构建变量 `VITE_API_URL`，重新部署网页。
 
 Worker 的定时任务：每分钟发送通知；每 15 分钟同步 AutoCount、Google 日历、Drive 存档；每天早上 8 点（马来西亚时间）发提醒。
 

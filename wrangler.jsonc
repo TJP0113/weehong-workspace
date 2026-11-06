@@ -1,0 +1,9 @@
+{
+  // 网页部署设定（Cloudflare Workers 静态网站）。后端在 worker/ 文件夹，另外部署。
+  "name": "weehong-workspace",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
