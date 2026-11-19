@@ -7,10 +7,9 @@ import { useCollection } from '../lib/store';
 import { wsTypeLabel, type Worksheet, type WsPart } from '../lib/types';
 import { daysSince, statusOf } from '../lib/utils';
 import { Icon } from './Icon';
-import { TRUCK_PHOTO } from './TruckArt';
 import { Fold } from './ui';
 
-export function PageHero({ kicker, title, sub, actions, photo = TRUCK_PHOTO, left, side, label }: {
+export function PageHero({ kicker, title, sub, actions, photo = false, left, side, label }: {
   kicker?: ReactNode; title: ReactNode; sub?: ReactNode; actions?: ReactNode; photo?: string | false; left?: ReactNode; side?: ReactNode; label?: string;
 }) {
   return (

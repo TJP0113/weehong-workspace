@@ -4,7 +4,6 @@ import { AddPartDialog, linesFor, PositionPicker, type NewLine } from '../compon
 import { FieldInput } from '../components/FieldInput';
 import { Icon } from '../components/Icon';
 import { PageHero } from '../components/glass';
-import { TRUCK_PHOTO } from '../components/TruckArt';
 import { Modal, useUi } from '../components/ui';
 import { createWorksheet } from '../lib/actions';
 import { useApp } from '../lib/app';
@@ -119,7 +118,7 @@ export default function NewWorksheet() {
   return (
     <>
       <div className="wshead"><Link className="iconbtn" to="/board" aria-label="返回"><Icon name="left" /></Link><span className="gchip">按步骤填写，右边会显示将建立的内容</span></div>
-      <PageHero label="新建工作表" photo={TRUCK_PHOTO} title={<>新建<br />工作表</>} />
+      <PageHero label="新建工作表" title={<>新建<br />工作表</>} />
       <div className="row">
         <div className="col grow" style={{ gap: 20 }}>
           <section className="card">

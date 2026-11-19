@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { TRUCK_PHOTO } from '../components/TruckArt';
 import { WsCard } from '../components/glass';
 import { useMyNotifications, useOpenWorksheets } from '../components/Layout';
 import { Empty, Fold, Loading, Pill, useUi } from '../components/ui';
@@ -122,7 +121,7 @@ export default function Home() {
 
   return (
     <>
-      <section className="hero home-hero" aria-label="今天">
+      <section className="hero home-hero nophoto" aria-label="今天">
         <div className="hero-col">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
             <span className="datechip">{fmtMD(t0)} · {fmtWeekday(t0)}</span>
@@ -145,8 +144,6 @@ export default function Home() {
             <div className="k" style={{ display: 'flex', justifyContent: 'space-between' }}>{['一', '二', '三', '四', '五', '六'].map((d, i) => <span key={d} style={i === pk ? { color: 'var(--ink)', fontWeight: 700 } : undefined}>{d}</span>)}</div>
           </section>
         </div>
-
-        <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
 
         <div className="hero-col right">
           <section className="card" aria-label="进行中的工作表">
