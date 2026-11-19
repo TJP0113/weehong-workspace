@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { DarkCard, DarkZone, DGrid, DSearch, DSeg, FSelect, GlassStat, LimeAdd, PageHero, Ring, usePaged } from '../components/glass';
-import { Fold, Loading, Modal, useUi } from '../components/ui';
+import { DarkCard, DarkZone, DSearch, DSeg, FSelect, GlassStat, LimeAdd, PageHero, Ring, usePaged } from '../components/glass';
+import { Loading, Modal, useUi } from '../components/ui';
 import { nextNo } from '../lib/actions';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
@@ -22,7 +22,6 @@ export default function Rentals() {
   const [src, setSrc] = useState('');
   const [kind, setKind] = useState('');
   const [q, setQ] = useState('');
-  const [openId, setOpenId] = useState<string | null>(null);
   const [newOrder, setNewOrder] = useState(false);
   const all = machines || [];
   const n = (st: string) => all.filter((m) => m.status === st).length;
@@ -52,7 +51,6 @@ export default function Rentals() {
         </>}
         side={<>
           <section className="card" aria-label="7 天内到期">
-            <Fold />
             <h2>7 天内到期</h2>
             {ending.length === 0 ? <p className="k" style={{ margin: 0 }}>7 天内没有租期到期的机械</p> : ending.map((m) => (
               <div key={m.code} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 8, borderTop: '1px solid var(--sep)' }}>
@@ -63,7 +61,6 @@ export default function Rentals() {
             ))}
           </section>
           <section className="card" aria-label="本月保养">
-            <Fold />
             <h2>本月保养</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div className="ring light" style={{ background: `conic-gradient(#0B1A30 ${due.length ? Math.round(((due.length - thisMonth) / Math.max(1, due.length)) * 100) : 100}%, rgba(255,255,255,0.55) 0)` }}><span><b>{thisMonth}</b><small>台</small></span></div>
@@ -73,7 +70,7 @@ export default function Rentals() {
         </>}
       />
       <DarkZone label="机械与订单" bar={<>
-        <DSeg value={view} onChange={(k) => { setView(k); setOpenId(null); }} tabs={[{ k: 'machines', l: '机械', n: all.length }, { k: 'orders', l: '租赁订单', n: (orders || []).length }, ]} />
+        <DSeg value={view} onChange={setView} tabs={[{ k: 'machines', l: '机械', n: all.length }, { k: 'orders', l: '租赁订单', n: (orders || []).length }, ]} />
         {view === 'machines' && <>
           <FSelect label="状态" value={tab} onChange={(v) => { setTab(v); reset(); }} all="状态：全部" options={Object.entries(M_STATUS).map(([k, [l]]) => ({ v: k, l }))} />
           <FSelect label="种类" value={kind} onChange={(v) => { setKind(v); reset(); }} all="全部种类" options={kinds.map((k) => ({ v: k, l: k }))} />
@@ -97,8 +94,7 @@ export default function Rentals() {
                     chips={[soon ? '快到期' : '', m.provider === 'own' ? '本公司' : `供应商${m.supplierName ? ` · ${m.supplierName}` : ''}`, m.rate && RATE_LABEL[m.rate] ? `按${RATE_LABEL[m.rate]}` : '']}
                     dot={`var(--${st[1]})`} meta={`${st[0]}${rented ? ` · 到 ${fmtMD(m.rentEnd)}` : m.location ? ` · ${m.location}` : ''}`}
                     ring={rented ? <Ring pct={(left / total) * 100} big={left} small="天" color={soon ? '#F0A43A' : undefined} /> : <Ring pct={0} big={st[0].replace('在', '')} small="状态" />}
-                    alert={!!soon} open={openId === m.code} onToggle={() => setOpenId(openId === m.code ? null : m.code)}>
-                    <DGrid rows={[['系列号码', m.serial || '—'], ['租赁期', rented ? `${fmtDate(m.rentStart)} → ${fmtDate(m.rentEnd)}` : '—'], ['地点', m.location || '—'], ['下次保养', m.provider === 'own' ? fmtDate(m.nextMaintenance) : '供应商负责']]} />
+                    alert={!!soon}>
                     <div className="chips">
                       <Link className="btn" style={{ flex: 1 }} to={`/rentals/${m.code}`}>{m.status === 'rented' && can('rent.renew') ? '续租 / 详情' : '查看详情'}</Link>
                       {m.provider === 'own' && <Link className="btn ghost" to={`/worksheets/new?machine=${m.code}&type=maintenance`}>开保养工作表</Link>}
@@ -117,10 +113,7 @@ export default function Rentals() {
                   chips={[`${fmtMD(o.start)} 起`, `按${RATE_LABEL[o.rate]}`, o.mechanicName ? `检查：${o.mechanicName}` : '未委派维修员']}
                   dot="var(--blue)" meta={`现在：${ORDER_STEPS[o.step] || ''}`}
                   ring={<Ring pct={(o.step / (ORDER_STEPS.length - 1)) * 100} big={`${o.step + 1}/${ORDER_STEPS.length}`} small="步骤" />}
-                  open={openId === o.id} onToggle={() => setOpenId(openId === o.id ? null : o.id)}>
-                  <DGrid rows={[['租期', `${fmtDate(o.start)} → ${fmtDate(o.end)}`], ['地点', o.location || '—'], ['建立', fmtMD(o.createdAt)]]} />
-                  <Link className="btn" to={`/rentals/${o.machineCode}`}>处理订单</Link>
-                </DarkCard>
+                  to={`/rentals/${o.machineCode}`} />
               ))}
             </div>
           )

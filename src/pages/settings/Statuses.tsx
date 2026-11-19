@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Fold, Pill, useUi } from '../../components/ui';
+import { Pill, useUi } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { store } from '../../lib/store';
 import { ROLES, type Role, type StatusDef, type Tone } from '../../lib/types';
@@ -16,7 +16,6 @@ export default function Statuses() {
   const set = (i: number, p: Partial<StatusDef>) => setList(list.map((s, j) => (j === i ? { ...s, ...p } : s)));
   return (
     <section className="card">
-      <Fold />
       <div className="col" style={{ gap: 6 }}><h2>工作状态</h2><p className="small muted" style={{ margin: 0 }}>可以改名称、颜色和由谁处理。流程顺序固定：待维修 → 维修中（可改为等待零件）→ 维修完成 → 文员处理中 → 待管理员检查 → 已结案。</p></div>
       {!edit && <ReadOnlyNote />}
       {list.map((s, i) => (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../../components/Icon';
-import { Fold, Loading, Modal, useUi } from '../../components/ui';
+import { Loading, Modal, useUi } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { store, useCollection } from '../../lib/store';
 import type { Part, PositionGroup } from '../../lib/types';
@@ -29,7 +29,6 @@ export default function Positions() {
   return (
     <>
       <section className="card">
-        <Fold />
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 }}>
           <div className="col" style={{ gap: 6 }}><h2>位置选项组</h2><p className="small muted" style={{ margin: 0 }}>AutoCount 没有区分前后左右，在这里补上。只存在本系统，不会改动 AutoCount 资料。</p></div>
           {edit && <button className="btn" type="button" onClick={() => setG({ id: uid(), name: '', options: [] })}><Icon name="plus" />新增选项组</button>}
@@ -46,7 +45,6 @@ export default function Positions() {
         </div>
       </section>
       <section className="card tight">
-        <Fold />
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, padding: '12px 12px 14px' }}>
           <div className="col" style={{ gap: 6 }}><h2>为零件设定位置和分类</h2><p className="small muted" style={{ margin: 0 }}>勾选后，加入这个零件时就要选位置。分类用于新建工作表的快速勾选。</p></div>
           <label className="searchbox" style={{ maxWidth: 280, height: 40 }}><Icon name="search" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索 AutoCount 零件" aria-label="搜索零件" /></label>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { DarkCard, DarkZone, DGrid, DSearch, DSeg, GlassStat, LimeAdd, PageHero, PROGRESS, Ring, usePaged } from '../components/glass';
-import { Fold, Loading, Modal, useUi } from '../components/ui';
+import { DarkCard, DarkZone, DSearch, DSeg, GlassStat, LimeAdd, PageHero, PROGRESS, Ring, usePaged } from '../components/glass';
+import { Loading, Modal, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
 import { store, useCollection } from '../lib/store';
@@ -37,7 +37,6 @@ export default function Inspections() {
   const [tab, setTab] = useState('all');
   const [q, setQ] = useState('');
   const [add, setAdd] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
   const [resultFor, setResultFor] = useState<Inspection | null>(null);
   const [bookFor, setBookFor] = useState<Inspection | null>(null);
   const t0 = today();
@@ -58,7 +57,6 @@ export default function Inspections() {
         actions={can('inspection.edit') && <button className="btn" type="button" onClick={() => setAdd(true)}><Icon name="plus" />登记验车</button>}
         left={
           <section className="card" aria-label="近期验车日程">
-            <Fold />
             <div className="col" style={{ gap: 2 }}><h2>近期验车日程</h2><span className="k">已同步到 Google 日历</span></div>
             {!rows ? <Loading n={1} /> : upcoming.length === 0 ? <p className="k" style={{ margin: 0 }}>没有已预约的验车</p> : upcoming.map((i) => {
               const w = wsOf(i);
@@ -98,8 +96,7 @@ export default function Inspections() {
                   chips={[res, i.date ? `${fmtMD(i.date)} 验车${left === 0 ? ' · 今天' : left !== null && left > 0 ? ` · 还有 ${left} 天` : ''}` : '未预约日期', (i.attempt || 1) > 1 ? `第 ${i.attempt} 次` : '']}
                   dot={`var(--${tone})`} meta={w ? `保养${statusOf(statuses, w.status).label} · ${w.no}` : '还没有保养工作表'}
                   ring={i.result === 'pass' ? <Ring pct={100} big="通过" small="验车" /> : <Ring pct={pct} big={`${pct}%`} small="保养" color={failed(i) ? '#FF8A8F' : undefined} />}
-                  alert={failed(i)} open={openId === i.id} onToggle={() => setOpenId(openId === i.id ? null : i.id)}>
-                  <DGrid rows={[['送车日期', fmtDate(i.receivedAt)], ['验车地点', i.place || '—'], ['保养工作表', w ? <Link to={`/worksheets/${w.id}`}>{w.no}</Link> : '还没开'], ['备注', i.note || '—']]} />
+                  alert={failed(i)}>
                   <div className="chips">
                     {can('inspection.edit') && i.result === 'booked' && <button className="btn" type="button" onClick={() => setResultFor(i)}>记录结果</button>}
                     {can('inspection.edit') && i.result === 'unbooked' && <button className="btn" type="button" onClick={() => setBookFor(i)}>预约日期</button>}

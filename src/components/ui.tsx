@@ -17,7 +17,7 @@ export function Stat({ n, label, tone, href }: { n: ReactNode; label: string; to
 }
 
 /* ---------- collapse / expand button for a card ----------
-   Put <Fold /> as the first child of a .card; the next child is its header row and stays visible.
+   Put  as the first child of a .card; the next child is its header row and stays visible.
    The choice is remembered per page type and card, so e.g. 零件清单 stays folded on every worksheet. */
 const FOLD_KEY = 'weehong-folds';
 function readFolds(): Record<string, boolean> { try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '{}'); } catch { return {}; } }

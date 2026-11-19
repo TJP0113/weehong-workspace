@@ -13,7 +13,6 @@ export default function Worksheets() {
   const [tab, setTab] = useState<'open' | 'closed'>('open');
   const [q, setQ] = useState('');
   const [typeF, setTypeF] = useState('');
-  const [openId, setOpenId] = useState<string | null>(null);
   const openRows = useCollection<Worksheet>('worksheets', { where: [['status', '!=', 'closed']] });
   const closedRows = useCollection<Worksheet>('worksheets', { where: [['status', '==', 'closed']], orderBy: ['updatedAt', 'desc'], limit: 200 });
   const rows = tab === 'open' ? openRows : closedRows;
@@ -25,7 +24,7 @@ export default function Worksheets() {
   return (
     <>
       <PageHero label="工作表"
-        kicker={<span className="datechip">点卡片的 ＋ 展开零件，点「打开工作表」看详情</span>}
+        kicker={<span className="datechip">点卡片打开工作表</span>}
         title={<>全部<br />工作表</>}
         actions={can('ws.create') && <Link className="btn" to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
         side={<GlassStat title="概况" items={[
@@ -36,7 +35,7 @@ export default function Worksheets() {
         ]} />}
       />
       <DarkZone label="工作表列表" bar={<>
-        <DSeg value={tab} onChange={(k) => { setTab(k); reset(); setOpenId(null); }} tabs={[{ k: 'open', l: '进行中', n: o.length }, { k: 'closed', l: '已结案' }]} />
+        <DSeg value={tab} onChange={(k) => { setTab(k); reset(); }} tabs={[{ k: 'open', l: '进行中', n: o.length }, { k: 'closed', l: '已结案' }]} />
         <FSelect label="类型" value={typeF} onChange={(v) => { setTypeF(v); reset(); }} all="全部类型" options={WS_TYPES.map((t) => ({ v: t.key, l: t.label }))} />
         <DSearch value={q} onChange={(v) => { setQ(v); reset(); }} placeholder="搜索车牌、顾客、工作表号" />
         {can('ws.create') && <LimeAdd to="/worksheets/new" label="新建工作表" />}
@@ -44,8 +43,7 @@ export default function Worksheets() {
       </>}>
         {!rows ? <Loading /> : shown.length === 0 ? <p className="kd" style={{ margin: 0 }}>没有符合的工作表</p> : (
           <div className="wgrid">
-            {shown.map((w) => <WsCard key={w.id} w={w} late={isLate(w)} open={openId === w.id} onToggle={() => setOpenId(openId === w.id ? null : w.id)}
-              extra={<a className="btn ghost" href={`/worksheets/${w.id}/print`} target="_blank" rel="noreferrer"><Icon name="print" />打印</a>} />)}
+            {shown.map((w) => <WsCard key={w.id} w={w} late={isLate(w)} />)}
           </div>
         )}
       </DarkZone>

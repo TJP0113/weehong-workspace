@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { WsCard } from '../components/glass';
 import { useMyNotifications, useOpenWorksheets } from '../components/Layout';
-import { Empty, Fold, Loading, Pill, useUi } from '../components/ui';
+import { Empty, Loading, Pill, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { enablePush } from '../lib/notify';
 import { store, useCollection } from '../lib/store';
@@ -30,7 +30,6 @@ export default function Home() {
   const [whoF, setWhoF] = useState('');
   const [stF, setStF] = useState('');
   const [page, setPage] = useState(0);
-  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => { const h = () => { if (location.hash === '#notifications') { setTab('notes'); setTimeout(() => document.getElementById('worklist')?.scrollIntoView({ behavior: 'smooth' }), 50); } }; h(); window.addEventListener('hashchange', h); return () => window.removeEventListener('hashchange', h); }, []);
 
@@ -130,7 +129,6 @@ export default function Home() {
           <h1 data-i18n-join="">今日<br />工作</h1>
           {(role === 'admin' || role === 'warehouse') && <Link className="btn" style={{ alignSelf: 'flex-start' }} to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
           <section className="card" aria-label="本周结案趋势" style={{ maxWidth: 380 }}>
-            <Fold />
             <h2>本周结案趋势</h2>
             {Math.max(...week) === 0 ? <p className="k" style={{ margin: 0, padding: '18px 0' }}>本周还没有结案的工作表，结案后会显示每天的数量。</p> : <svg viewBox="-6 -4 332 114" width="100%" role="img" aria-label={`本周每天结案数：${week.join('、')}`}>
               <defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.4" height="7" fill="rgba(11,26,48,0.4)" /></pattern></defs>
@@ -147,7 +145,6 @@ export default function Home() {
 
         <div className="hero-col right">
           <section className="card" aria-label="进行中的工作表">
-            <Fold />
             <h2>进行中的工作表</h2>
             <div className="bignums">
               <div><b className="num">{cnt('pending')}</b><span>待维修</span></div>
@@ -161,14 +158,12 @@ export default function Home() {
           </section>
           <div className="duo">
             <section className="card" aria-label="超时">
-              <Fold />
               <h2>超时</h2>
               <b className="bigone num">{late.length}<small style={{ color: late.length ? 'var(--red-ink)' : undefined }}> 张</small></b>
               <div className="meter"><i style={{ width: `${ws.length ? (late.length / ws.length) * 100 : 0}%` }} /></div>
               <div className="k" style={{ display: 'flex', justifyContent: 'space-between' }}><span>超过 {general.overdueDays} 天</span><span>共 {ws.length} 张</span></div>
             </section>
             <section className="card" aria-label="本月结案">
-              <Fold />
               <h2>本月结案</h2>
               <b className="bigone num">{thisMonth}{lastMonth > 0 && <small style={{ color: thisMonth >= lastMonth ? 'var(--green-ink)' : 'var(--red-ink)' }}> {thisMonth >= lastMonth ? '+' : ''}{Math.round(((thisMonth - lastMonth) / lastMonth) * 100)}%</small>}</b>
               <div className="spark" aria-hidden="true">{months.map((n, i) => <i key={i} style={{ height: `${Math.max(8, (n / Math.max(1, ...months)) * 100)}%`, background: i === 11 ? '#0B1A30' : undefined }} />)}</div>
@@ -215,7 +210,7 @@ export default function Home() {
 
         {curTab === 'ws' && (!open ? <Loading /> : shown.length === 0 ? <p className="kd" style={{ margin: 0 }}>没有符合的工作表</p> : (
           <div className="wgrid">
-            {shown.map((w) => <WsCard key={w.id} w={w} open={openId === w.id} onToggle={() => setOpenId(openId === w.id ? null : w.id)} late={isLate(w)} />)}
+            {shown.map((w) => <WsCard key={w.id} w={w} late={isLate(w)} />)}
           </div>
         ))}
 

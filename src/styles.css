@@ -434,6 +434,8 @@ html, body { overflow-x: clip; }
 .ddl dt { font-size: 0.78rem; color: rgba(241, 244, 249, 0.6); margin: 0 0 2px; }
 .ddl dd { margin: 0; font-size: 0.9rem; overflow-wrap: anywhere; }
 .ddl a { color: #D2F45C; }
+.gdark.link { cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+.gdark.link:hover { border-color: rgba(210, 244, 92, 0.55); transform: translateY(-2px); }
 .gdark.alert { border-color: rgba(255, 138, 143, 0.45); }
 .dkanban { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; align-items: start; }
 .dcol { min-width: 0; border-radius: 24px; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); }

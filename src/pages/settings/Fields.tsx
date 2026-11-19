@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../../components/Icon';
-import { Fold, Switch, useUi } from '../../components/ui';
+import { Switch, useUi } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { store } from '../../lib/store';
 import { ROLES, type FieldDef, type FieldRole, type FieldType, type Role } from '../../lib/types';
@@ -21,7 +21,6 @@ export default function Fields() {
   return (
     <div className="row">
       <section className="card grow" style={{ flexBasis: 480 }}>
-        <Fold />
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 }}>
           <div className="col" style={{ gap: 6 }}><h2>工作表字段</h2><p className="small muted" style={{ margin: 0 }}>货仓管理员建立工作表时要填写的资料。停用的字段，旧工作表仍保留资料。</p></div>
           {edit && <button className="btn" type="button" onClick={() => setForm({ id: uid(), label: '', type: 'text', required: false, enabled: true, role: '', editors: ['admin', 'warehouse'] })}><Icon name="plus" />新增字段</button>}
@@ -41,7 +40,6 @@ export default function Fields() {
       </section>
       {form && (
         <section className="card aside" style={{ border: '1px solid var(--line)' }}>
-          <Fold />
           <h2>{fields.some((f) => f.id === form.id) ? '编辑字段' : '新增字段'}</h2>
           <div className="field"><label htmlFor="fl">字段名称</label><input id="fl" className="input" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="例如：引擎号码" /></div>
           <div className="field"><span className="lbl">字段类型</span><div className="grid2" style={{ gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>{TYPES.map(([k, l]) => <button key={k} type="button" className={`choice ${form.type === k ? 'on' : ''}`} aria-pressed={form.type === k} onClick={() => setForm({ ...form, type: k })}>{l}</button>)}</div></div>

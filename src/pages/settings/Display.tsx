@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../../components/Icon';
-import { Fold, Switch } from '../../components/ui';
+import { Switch } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { enablePush } from '../../lib/notify';
 import { store } from '../../lib/store';
@@ -14,7 +14,6 @@ export default function Display() {
   return (
     <div className="grid2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, alignItems: 'start' }}>
       <section className="card">
-        <Fold />
         <div className="col" style={{ gap: 4 }}><h2>主题</h2><span className="k">每人自己选，只影响自己的画面</span></div>
         <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px,1fr))', gap: 10 }}>
           {([['glass', '液态玻璃', 'linear-gradient(90deg,#0E3059,#4A6896,#86A2D4)'], ['dark', '深色', 'linear-gradient(135deg,#0A0A0B 50%,#1C1C20 50%)'], ['light', '浅色', 'linear-gradient(135deg,#F4F4F2 50%,#FFFFFF 50%)'], ['system', '跟随系统', 'linear-gradient(90deg,#0A0A0B 50%,#F4F4F2 50%)']] as [Theme, string, string][]).map(([k, l, bg]) => (
@@ -26,7 +25,6 @@ export default function Display() {
         <span className="small muted">车间光线强时建议用浅色，减少反光</span>
       </section>
       <section className="card">
-        <Fold />
         <div className="col" style={{ gap: 4 }}><h2>文字大小</h2><span className="k">大字模式会放大全部文字和按钮</span></div>
         <div className="grid2" style={{ gap: 10 }}>
           {[[false, '标准', 15], [true, '大字', 18]].map(([v, l, px]) => (
@@ -37,14 +35,12 @@ export default function Display() {
         </div>
       </section>
       <section className="card">
-        <Fold />
         <div className="col" style={{ gap: 4 }}><h2>语言</h2><span className="k">整个界面都会切换；零件名称、顾客名称保持原文</span></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 10 }}>
           {([['zh', '中文'], ['en', 'English'], ['ms', 'Bahasa Melayu']] as [Lang, string][]).map(([k, l]) => <button key={k} type="button" role="radio" aria-checked={p.lang === k} onClick={() => { set({ lang: k }); location.reload(); }} className="choice" style={{ minHeight: 52, ...ring(p.lang === k) }}>{l}</button>)}
         </div>
       </section>
       <section className="card">
-        <Fold />
         <div className="col" style={{ gap: 4 }}><h2>弹窗通知与提示音</h2><span className="k">手机和电脑都会弹出通知，即使没有打开系统</span></div>
         <button className="btn" type="button" onClick={async () => setMsg(await enablePush(staff!.id).catch((e) => e.message))}><Icon name="bell" />在这台设备开启弹窗通知</button>
         {msg && <span className="small muted">{msg}</span>}

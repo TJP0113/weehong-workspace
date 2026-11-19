@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../../components/Icon';
-import { Banner, Fold, Pill, Switch, useUi } from '../../components/ui';
+import { Banner, Pill, Switch, useUi } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { API_URL, DEMO } from '../../lib/firebase';
 import { apiRedirect, callApi } from '../../lib/notify';
@@ -30,7 +30,6 @@ export default function Integrations() {
   };
   const card = (title: string, sub: string, icon: string, status: React.ReactNode, children: React.ReactNode) => (
     <section className="card">
-      <Fold />
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <span style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--card)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name={icon} size={20} /></span>
         <div className="col" style={{ gap: 3, flex: 1 }}><h2 style={{ fontSize: '1.05rem' }}>{title}</h2><span className="k">{sub}</span></div>

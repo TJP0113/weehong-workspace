@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { GlassStat, PageHero } from '../components/glass';
-import { Empty, Fold, Loading, Modal, Pill, useUi } from '../components/ui';
+import { Empty, Loading, Modal, Pill, useUi } from '../components/ui';
 import { nextNo } from '../lib/actions';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
@@ -76,7 +76,6 @@ export default function Transport() {
 
         {cur ? (
           <section className="card grow">
-            <Fold />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 }}>
               <div className="col" style={{ gap: 4 }}><span className="small muted num">{cur.no} · {fmtMD(cur.date)} {fmtWeekday(cur.date)}{cur.time ? ` · ${cur.time} 出发` : ''}</span><h2 style={{ fontSize: '1.4rem' }}>{cur.title}</h2></div>
               <Pill tone={ST[cur.status][1]}>{ST[cur.status][0]}</Pill>

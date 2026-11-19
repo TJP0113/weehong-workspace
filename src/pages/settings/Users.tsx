@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '../../components/Icon';
-import { ExpandList, Fold, Loading, Pill, Two, useUi } from '../../components/ui';
+import { ExpandList, Loading, Pill, Two, useUi } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { DEFAULT_PERMISSIONS } from '../../lib/defaults';
 import { DEMO } from '../../lib/firebase';
@@ -42,7 +42,6 @@ export default function Users() {
     <div className="row">
       <div className="col" style={{ flex: '999 1 560px', gap: 20 }}>
         <section className="card tight">
-          <Fold />
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, padding: '12px 12px 14px' }}>
             <div className="col" style={{ gap: 6 }}><h2>人员名单</h2><p className="small muted" style={{ margin: 0 }}>{users.filter((u) => u.active).length} 人使用中 · {users.filter((u) => !u.active).length} 人已停用。停用后无法登录，但过去的记录会保留。</p></div>
             <div className="seg" role="tablist">{([['all', '全部'], ...ROLES.map((r) => [r.key, r.label])] as [string, string][]).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={roleTab === k} className={roleTab === k ? 'on' : ''} onClick={() => setRoleTab(k as any)}>{l}</button>)}</div>
@@ -67,7 +66,6 @@ export default function Users() {
           />
         </section>
         <section className="card tight">
-          <Fold />
           <div className="col" style={{ gap: 6, padding: '12px 12px 14px' }}><h2>角色权限</h2><p className="small muted" style={{ margin: 0 }}>每个角色可以做什么。改动对该角色的所有人员生效。</p></div>
           {PERM_GROUPS.map((g) => (
             <div key={g.group}>
@@ -85,7 +83,6 @@ export default function Users() {
       </div>
       {edit ? (
         <section className="card aside" style={{ border: '1px solid var(--line)' }}>
-          <Fold />
           <h2>新增人员</h2>
           <div className="field"><label htmlFor="u-n">姓名</label><input id="u-n" className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="例如：吴志强" /></div>
           <div className="field"><label htmlFor="u-e">Google 账号（电邮）</label><input id="u-e" className="input" type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="name@gmail.com 或公司 Google 邮箱" /></div>

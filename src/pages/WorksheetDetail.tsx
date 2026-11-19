@@ -4,7 +4,7 @@ import { AddPartDialog } from '../components/AddPartDialog';
 import { FieldInput } from '../components/FieldInput';
 import { Icon } from '../components/Icon';
 import { TRUCK_PHOTO } from '../components/TruckArt';
-import { Empty, ExpandList, Fold, Loading, Pill, useUi } from '../components/ui';
+import { Empty, ExpandList, Loading, Pill, useUi } from '../components/ui';
 import { addEntry, addPhoto, changeStatus, recountParts, review } from '../lib/actions';
 import { useApp } from '../lib/app';
 import { NEXT_STEP } from '../lib/defaults';
@@ -148,7 +148,6 @@ export default function WorksheetDetail() {
         <div className="col grow" style={{ gap: 20 }}>
 
           <section className="card tight" aria-labelledby="parts-h">
-            <Fold />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '12px 12px 10px' }}>
               <h2 id="parts-h">零件清单</h2>
               {can('ws.parts') && !closed && <button className="btn ghost sm" type="button" onClick={() => setAdding(true)}><Icon name="plus" />加入零件</button>}
@@ -180,7 +179,6 @@ export default function WorksheetDetail() {
           </section>
 
           <section className="card" aria-labelledby="log-h">
-            <Fold />
             <h2 id="log-h">维修事项</h2>
             {can('ws.entry') && !closed && (
               <form onSubmit={(e) => { e.preventDefault(); send(); }} style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--card2)', borderRadius: 14, padding: '6px 6px 6px 14px', border: '1px solid var(--line)' }}>
@@ -201,7 +199,6 @@ export default function WorksheetDetail() {
           </section>
 
           <section className="card" aria-labelledby="st-h">
-            <Fold />
             <h2 id="st-h">状态记录</h2>
             {(logs || []).map((l) => (
               <div key={l.id} style={{ display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap' }} className="small">
@@ -215,7 +212,6 @@ export default function WorksheetDetail() {
 
         <aside className="col aside" style={{ gap: 16 }}>
           <section className="card" aria-labelledby="car-h">
-            <Fold />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
               <h2 id="car-h">车辆资料</h2>
               {ws.plate && <span className="plate">{ws.plate}</span>}

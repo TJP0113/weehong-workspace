@@ -3,11 +3,10 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../lib/app';
-import { useCollection } from '../lib/store';
-import { wsTypeLabel, type Worksheet, type WsPart } from '../lib/types';
+import { wsTypeLabel, type Worksheet } from '../lib/types';
 import { daysSince, statusOf } from '../lib/utils';
 import { Icon } from './Icon';
-import { Fold } from './ui';
+
 
 export function PageHero({ kicker, title, sub, actions, photo = false, left, side, label }: {
   kicker?: ReactNode; title: ReactNode; sub?: ReactNode; actions?: ReactNode; photo?: string | false; left?: ReactNode; side?: ReactNode; label?: string;
@@ -31,7 +30,6 @@ export interface StatItem { n: ReactNode; unit?: string; label: string; tone?: '
 export function GlassStat({ title, items, children, label }: { title: string; items: StatItem[]; children?: ReactNode; label?: string }) {
   return (
     <section className="card" aria-label={label || title}>
-      <Fold />
       <h2>{title}</h2>
       <div className="bignums">
         {items.map((x) => {
@@ -114,16 +112,16 @@ export function Ring({ pct, big, small, color = '#D2F45C' }: { pct: number; big:
   );
 }
 
-/** Dark expandable card: header, chips, status line and a ring; expands to show children. */
-export function DarkCard({ plate, title, sub, chips, dot, meta, ring, open, onToggle, children, alert }: {
-  plate?: string; title: ReactNode; sub?: ReactNode; chips?: ReactNode[]; dot?: string; meta?: ReactNode; ring?: ReactNode; open?: boolean; onToggle?: () => void; children?: ReactNode; alert?: boolean;
+/** Dark card: header, chips, status line and a ring. With `to` the whole card opens that page;
+    otherwise `children` (action buttons) sit along the bottom. */
+export function DarkCard({ plate, title, sub, chips, dot, meta, ring, children, alert, to }: {
+  plate?: string; title: ReactNode; sub?: ReactNode; chips?: ReactNode[]; dot?: string; meta?: ReactNode; ring?: ReactNode; children?: ReactNode; alert?: boolean; to?: string;
 }) {
-  return (
-    <article className={`gdark wscard ${alert ? 'alert' : ''}`}>
+  const body = (
+    <>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
         {plate && <span className="dplate">{plate}</span>}
         <div className="two" style={{ flex: 1 }}><b className="ell" style={{ fontSize: '1rem' }}>{title}</b>{sub && <span className="kd ell">{sub}</span>}</div>
-        {onToggle && <button className="dbtn sm" type="button" aria-expanded={!!open} aria-label={open ? '收起' : '展开'} onClick={onToggle}><Icon name={open ? 'minus' : 'plus'} size={16} stroke={2.2} /></button>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <div className="col" style={{ flex: 1, gap: 10 }}>
@@ -132,9 +130,12 @@ export function DarkCard({ plate, title, sub, chips, dot, meta, ring, open, onTo
         </div>
         {ring}
       </div>
-      {open && children && <div className="col dmore">{children}</div>}
-    </article>
+      {children && <div className="col dmore">{children}</div>}
+    </>
   );
+  return to
+    ? <Link to={to} className={`gdark wscard link ${alert ? 'alert' : ''}`}>{body}</Link>
+    : <article className={`gdark wscard ${alert ? 'alert' : ''}`}>{body}</article>;
 }
 
 /** Dark key/value grid used inside an expanded dark card. */
@@ -144,30 +145,18 @@ export function DGrid({ rows }: { rows: [string, ReactNode][] }) {
 
 export const PROGRESS: Record<string, number> = { pending: 0, repairing: 40, waiting_parts: 30, repaired: 60, clerk: 75, review: 90, closed: 100 };
 
-export function WsCard({ w, open, onToggle, late, extra }: { w: Worksheet; open: boolean; onToggle: () => void; late?: boolean; extra?: ReactNode }) {
+export function WsCard({ w, late }: { w: Worksheet; late?: boolean }) {
   const { statuses } = useApp();
   const st = statusOf(statuses, w.status);
-  const parts = useCollection<WsPart>(open ? `worksheets/${w.id}/parts` : null);
   const pct = PROGRESS[w.status] ?? 0;
   const closed = w.status === 'closed';
   return (
-    <DarkCard
+    <DarkCard to={`/worksheets/${w.id}`}
       plate={w.plate || w.machineCode || '—'} title={w.model || w.no}
       sub={`${w.customer || ''} · ${closed ? `已结案 ${w.statusSince?.slice(0, 10) || ''}` : `${st.label}第 ${daysSince(w.statusSince) + 1} 天`}`}
       chips={[wsTypeLabel(w.type), w.waitingParts && !closed ? `${w.waitingParts} 项待料` : '', w.source?.kind === 'inspection' ? w.source.label.replace(/^验车服务 · /, '') : '']}
       dot={late ? 'var(--red)' : `var(--${st.tone})`} meta={`${st.label} · ${w.assigneeName || '未派工'}`}
-      ring={<Ring pct={pct} big={`${pct}%`} small="进度" />} open={open} onToggle={onToggle} alert={late}
-    >
-      {!parts ? <span className="kd">载入零件…</span> : parts.length === 0 ? <span className="kd">还没有零件</span> : parts.map((p) => (
-        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: '0.9rem' }}>
-          <span className="ell">{p.name} <span className="kd">{p.position || ''}{p.qty > 1 ? ` × ${p.qty}` : ''}</span></span>
-          <span style={{ color: p.state === 'waiting' ? '#F0C77A' : '#7FD8AA', flex: 'none' }}>{p.state === 'waiting' ? '待料' : '已领料'}</span>
-        </div>
-      ))}
-      <div className="chips">
-        <Link className="btn" style={{ flex: 1 }} to={`/worksheets/${w.id}`}>打开工作表</Link>
-        {extra}
-      </div>
-    </DarkCard>
+      ring={<Ring pct={pct} big={`${pct}%`} small="进度" />} alert={late}
+    />
   );
 }

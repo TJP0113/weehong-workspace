@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { GlassStat, PageHero } from '../components/glass';
-import { Fold, Loading } from '../components/ui';
+import { Loading } from '../components/ui';
 import { useCollection, useDoc } from '../lib/store';
 import type { Inspection, Machine, RentalOrder, Trip } from '../lib/types';
 import { fmtWeekday, localDate, today } from '../lib/utils';
@@ -88,7 +88,6 @@ export default function CalendarPage() {
           </div>
         </section>
         <section className="card aside" aria-label="当日安排">
-          <Fold />
           <div className="col" style={{ gap: 4 }}><h2>{Number(sel.slice(5, 7))}月{Number(sel.slice(8))}日 {fmtWeekday(sel)}{sel === t0 ? ' · 今天' : ''}</h2><span className="k">{agenda.length} 项安排</span></div>
           {agenda.length === 0 ? <p className="empty" style={{ margin: 0 }}>这一天没有安排</p> : agenda.map((e, i) => (
             <article key={i} className="sub col" style={{ gap: 8 }}>
