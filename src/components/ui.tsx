@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Icon } from './Icon';
 import type { StatusDef, Tone } from '../lib/types';
 import { TONES } from '../lib/utils';
@@ -14,6 +14,41 @@ export const StatusPill = ({ s }: { s: StatusDef }) => <Pill tone={s.tone}>{s.la
 export function Stat({ n, label, tone, href }: { n: ReactNode; label: string; tone?: 'amber' | 'red'; href?: string }) {
   const inner = <><b>{n}</b><span>{label}</span></>;
   return href ? <a className={`stat ${tone || ''}`} href={href}>{inner}</a> : <div className={`stat ${tone || ''}`}>{inner}</div>;
+}
+
+/* ---------- collapse / expand button for a card ----------
+   Put <Fold /> as the first child of a .card; the next child is its header row and stays visible.
+   The choice is remembered per page type and card, so e.g. 零件清单 stays folded on every worksheet. */
+const FOLD_KEY = 'weehong-folds';
+function readFolds(): Record<string, boolean> { try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '{}'); } catch { return {}; } }
+export function Fold({ id }: { id?: string }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [folded, setFolded] = useState(false);
+  const [label, setLabel] = useState('');
+  const key = useRef('');
+  useLayoutEffect(() => {
+    const card = ref.current?.parentElement;
+    if (!card) return;
+    const name = id || card.getAttribute('aria-label') || card.querySelector('h2')?.textContent?.replace(/[（(]\d+[)）]|\d+/g, '').trim() || '';
+    key.current = `${location.pathname.split('/')[1] || 'home'}:${name}`;
+    setLabel(name);
+    const f = !!readFolds()[key.current];
+    setFolded(f);
+    card.toggleAttribute('data-folded', f);
+  }, [id]);
+  const toggle = () => {
+    const f = !folded;
+    setFolded(f);
+    ref.current?.parentElement?.toggleAttribute('data-folded', f);
+    const all = readFolds();
+    if (f) all[key.current] = true; else delete all[key.current];
+    try { localStorage.setItem(FOLD_KEY, JSON.stringify(all)); } catch { /* ignore */ }
+  };
+  return (
+    <button ref={ref} className="fold noprint" type="button" aria-expanded={!folded} aria-label={`${folded ? '展开' : '收起'}${label}`} title={folded ? '展开' : '收起'} onClick={toggle}>
+      <Icon name={folded ? 'plus' : 'minus'} size={16} stroke={2.2} />
+    </button>
+  );
 }
 
 /* ---------- expandable one-line list ---------- */

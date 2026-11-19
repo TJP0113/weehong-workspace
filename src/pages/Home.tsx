@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { TRUCK_PHOTO } from '../components/TruckArt';
 import { useMyNotifications, useOpenWorksheets } from '../components/Layout';
-import { Empty, Loading, Pill, Stat, useUi } from '../components/ui';
+import { Empty, Fold, Loading, Pill, Stat, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { enablePush } from '../lib/notify';
 import { store, useCollection } from '../lib/store';
@@ -82,13 +83,19 @@ export default function Home() {
 
   return (
     <>
-      <div className="pagehead">
-        <div><h1>{hello}，{staff!.name}</h1><p>{fmtMD(today())} {fmtWeekday(today())} · {data?.summary ?? '载入中'}</p></div>
-        {role !== 'mechanic' && (role === 'admin' || role === 'warehouse') && <Link className="btn" to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
-      </div>
+      <section className="hero" aria-label="今天">
+        <div className="hero-text">
+          <span className="datechip">{fmtMD(today())} {fmtWeekday(today())}</span>
+          <h1>{hello}，<br /><b>{staff!.name}</b></h1>
+          <p>{data?.summary ?? '载入中'}</p>
+          {(role === 'admin' || role === 'warehouse') && <Link className="btn" style={{ alignSelf: 'flex-start' }} to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
+        </div>
+        <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
+      </section>
       {data ? <div className="stats">{data.stats.map((s) => <Stat key={s.label} {...s} />)}</div> : <Loading n={1} />}
       <div className="row">
         <section className="card grow" aria-labelledby="todo">
+          <Fold />
           <h2 id="todo">现在要处理</h2>
           {!data ? <Loading /> : data.todos.length === 0 ? <Empty title="都处理完了" sub="新的工作会在这里出现，也会弹窗通知你" /> : data.todos.map((t, i) => (
             <article key={i} className="sub" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px', borderLeft: `4px solid var(--${t.tone === 'grey' ? 'line' : t.tone})`, borderRadius: 16, padding: 16 }}>
@@ -101,6 +108,7 @@ export default function Home() {
           ))}
         </section>
         <section id="notifications" className="card aside" aria-labelledby="nt">
+          <Fold />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <h2 id="nt">通知{unread.length ? `（${unread.length}）` : ''}</h2>
             {unread.length > 0 && <button className="btn ghost sm" type="button" onClick={markAll}>全部标为已读</button>}

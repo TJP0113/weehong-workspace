@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { Empty, Loading, Modal, Pill, useUi } from '../components/ui';
+import { Empty, Fold, Loading, Modal, Pill, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
 import { store, useCollection, useDoc } from '../lib/store';
@@ -95,6 +95,7 @@ export default function RentalDetail() {
         </section>
         <div className="col aside" style={{ gap: 20 }}>
           <section className="card">
+            <Fold />
             <h2>机械资料 <span className="tag" style={{ marginLeft: 6, verticalAlign: 'middle' }}>AutoCount</span></h2>
             <dl className="kv">
               <div><dt>机械代号</dt><dd>{m.code}</dd></div><div><dt>种类</dt><dd>{m.kind}</dd></div>
@@ -106,11 +107,13 @@ export default function RentalDetail() {
             </dl>
           </section>
           <section className="card">
+            <Fold />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}><h2>每月保养</h2><span className="small muted">{m.provider === 'own' ? `下次 ${fmtDate(m.nextMaintenance)}` : '供应商负责'}</span></div>
             {m.provider === 'own' && <Link className="btn ghost sm" style={{ alignSelf: 'flex-start' }} to={`/worksheets/new?machine=${m.code}&type=maintenance`}>开保养工作表</Link>}
             {(maint || []).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((w) => <Link key={w.id} to={`/worksheets/${w.id}`} className="sub small" style={{ display: 'flex', justifyContent: 'space-between', textDecoration: 'none' }}><span>{fmtDate(w.createdAt)} · {w.type === 'prerental' ? '出租前检查' : '保养'}</span><span className="muted">{w.no} ›</span></Link>)}
           </section>
           <section className="card">
+            <Fold />
             <h2>租赁与续租记录</h2>
             {(renewals || []).map((r) => <div key={r.id} className="sub small col" style={{ gap: 2 }}><b>续租 · 按{RATE_LABEL[r.rate]}</b><span className="muted num">{r.from} → {r.to}{r.note ? ` · ${r.note}` : ''} · {r.by}</span></div>)}
             {past.map((o) => <div key={o.id} className="sub small col" style={{ gap: 2 }}><b>{o.client} · 按{RATE_LABEL[o.rate]}</b><span className="muted num">{o.no} · {o.start} → {o.end}</span></div>)}

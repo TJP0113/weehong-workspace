@@ -16,7 +16,7 @@ export default function Board() {
   return (
     <>
       <div className="pagehead">
-        <div><h1>工作表看板</h1><p>{open?.length ?? 0} 张进行中{late ? <> · <span style={{ color: 'var(--red-ink)' }}>{late} 张超过 {general.overdueDays} 天未推进</span></> : null}</p></div>
+        <div><h1>工作表看板</h1><p>{open?.length ?? 0} 张进行中{late ? <> · <span className="pill" style={{ background: 'var(--red-bg)', color: 'var(--red-ink)' }}>{late} 张超过 {general.overdueDays} 天未推进</span></> : null}</p></div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <div className="seg" role="group" aria-label="筛选">
             {(['all', 'mine', 'late'] as const).map((k) => <button key={k} type="button" className={filter === k ? 'on' : ''} aria-pressed={filter === k} onClick={() => setFilter(k)}>{{ all: '全部', mine: '我负责的', late: '超时' }[k]}</button>)}

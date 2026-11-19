@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { Empty, Loading, Pill } from '../components/ui';
+import { Empty, Fold, Loading, Pill } from '../components/ui';
 import { useApp } from '../lib/app';
 import { useCollection, useDoc } from '../lib/store';
 import type { Inspection, Worksheet } from '../lib/types';
@@ -51,6 +51,7 @@ export default function InspectionDetail() {
       </div>
       <div className="row">
         <section className="card grow">
+          <Fold />
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div className="col" style={{ gap: 4 }}><h2>验车流程进度</h2><span className="k">{failed ? '曾经验车不通过，维修后复验' : '保养后送去验车'}</span></div><span className="small muted">{steps.filter((s) => s.k === 'done' || s.k === 'fail').length} / {steps.length} 步完成</span></div>
           <ol className="steps">
             {steps.map((s, n) => (
@@ -72,6 +73,7 @@ export default function InspectionDetail() {
           {can('inspection.edit') && i.result === 'booked' && <button className="btn big" type="button" onClick={() => setDlg('result')}>记录{failed ? '复验' : '验车'}结果</button>}
           {can('inspection.edit') && i.result === 'unbooked' && <button className="btn big" type="button" onClick={() => setDlg('book')}>预约{failed ? '复验' : '验车'}日期</button>}
           <section className="card">
+            <Fold />
             <h2>车辆资料</h2>
             <dl className="kv">
               <div className="full"><dt>顾客公司名</dt><dd>{i.customer}</dd></div>
@@ -81,6 +83,7 @@ export default function InspectionDetail() {
             </dl>
           </section>
           <section className="card">
+            <Fold />
             <h2>验车记录</h2>
             {(i.history || []).map((h, n) => <div key={n} className="sub" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span className="small num">{fmtDate(h.date)} · 第 {n + 1} 次</span><Pill tone={h.result === 'pass' ? 'green' : 'red'}>{h.result === 'pass' ? '通过' : '不通过'}</Pill></div>)}
             {i.result === 'booked' && <div className="sub" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span className="small num">{fmtDate(i.date)} · 第 {i.attempt || 1} 次</span><Pill tone="blue">待验车</Pill></div>}

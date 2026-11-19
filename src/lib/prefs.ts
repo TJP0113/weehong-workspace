@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export type Theme = 'dark' | 'light' | 'system';
+export type Theme = 'glass' | 'dark' | 'light' | 'system';
 export type Lang = 'zh' | 'en' | 'ms';
 export type SoundKind = 'dingdong' | 'beep' | 'off';
 export interface Prefs {
@@ -18,18 +18,24 @@ export const NOTIFY_KINDS = [
   { key: 'digest', label: '每天早上的待办摘要' },
 ];
 const KEY = 'weehong-prefs';
-const DEF: Prefs = { theme: 'dark', large: false, lang: 'zh', sound: 'dingdong', notify: { mine: true, overdue: true, due: true, trip: true, digest: false } };
+const DEF: Prefs = { theme: 'glass', large: false, lang: 'zh', sound: 'dingdong', notify: { mine: true, overdue: true, due: true, trip: true, digest: false } };
 
 let current: Prefs = DEF;
-try { current = { ...DEF, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { /* ignore */ }
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+  // one-time move to the new liquid-glass look; people can still switch back in 显示与语言
+  if (!saved.v2) { delete saved.theme; saved.v2 = true; }
+  current = { ...DEF, ...saved };
+} catch { /* ignore */ }
 const subs = new Set<(p: Prefs) => void>();
 
 export function applyPrefs(p: Prefs = current) {
   const dark = p.theme === 'dark' || (p.theme === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  const theme = p.theme === 'glass' ? 'glass' : dark ? 'dark' : 'light';
+  document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.size = p.large ? 'large' : 'normal';
   document.documentElement.lang = p.lang === 'zh' ? 'zh-Hans' : p.lang;
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#0A0A0B' : '#F4F4F2');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'glass' ? '#0E3059' : dark ? '#0A0A0B' : '#F4F4F2');
 }
 export const getPrefs = () => current;
 export function setPrefs(patch: Partial<Prefs>) {

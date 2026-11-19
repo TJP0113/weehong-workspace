@@ -80,6 +80,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <img className="logo-dark" src="/logo-white.png" alt="WEE HONG" />
           <img className="logo-light" src="/logo-color.png" alt="WEE HONG" />
         </Link>
+        <div className="sidepanel" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div className="me">
           <div className="avatar">{initial(staff?.name)}</div>
           <div className="two" style={{ flex: 1 }}><b className="ell">{staff?.name}</b><span>{t(roleLabel(role || ''))}{DEMO ? ' · 示范' : ''}</span></div>
@@ -99,6 +100,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
+        </div>
       </aside>
       <main className="main">
         <header className="topbar noprint">

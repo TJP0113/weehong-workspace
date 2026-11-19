@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { ExpandList, Loading, Modal, Pill, Stat, Two, useUi } from '../components/ui';
+import { ExpandList, Fold, Loading, Modal, Pill, Stat, Two, useUi } from '../components/ui';
 import { nextNo } from '../lib/actions';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
@@ -69,6 +69,7 @@ export default function Rentals() {
       </section>
       <div className="row">
         <section className="card aside" style={{ flexBasis: 420 }}>
+          <Fold />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}><h2>保养提醒（30 天内）</h2><span className="small muted">本公司机械每月一次 · 供应商机械由供应商负责</span></div>
           {due.length === 0 ? <p className="muted">30 天内没有要保养的机械</p> : due.map((m) => (
             <div key={m.code} className="sub" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -79,6 +80,7 @@ export default function Rentals() {
           ))}
         </section>
         <section className="card aside" style={{ flexBasis: 420 }}>
+          <Fold />
           <h2>进行中的租赁订单</h2>
           {orders.length === 0 ? <p className="muted">没有进行中的订单</p> : orders.map((o) => (
             <Link key={o.id} to={`/rentals/${o.machineCode}`} className="sub col" style={{ gap: 10, textDecoration: 'none' }}>

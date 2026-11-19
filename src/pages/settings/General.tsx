@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useUi } from '../../components/ui';
+import { Fold, useUi } from '../../components/ui';
 import { useApp } from '../../lib/app';
 import { store } from '../../lib/store';
 import type { GeneralSettings } from '../../lib/types';
@@ -21,6 +21,7 @@ export default function General() {
   };
   return (
     <section className="card">
+      <Fold />
       <h2>公司与车辆</h2>
       {!edit && <ReadOnlyNote />}
       <div className="grid2">

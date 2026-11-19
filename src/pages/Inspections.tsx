@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { ExpandList, Loading, Modal, Pill, Stat, Two, useUi } from '../components/ui';
+import { TRUCK_PHOTO } from '../components/TruckArt';
+import { ExpandList, Fold, Loading, Modal, Pill, Stat, Two, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
 import { store, useCollection } from '../lib/store';
@@ -47,10 +48,14 @@ export default function Inspections() {
   const upcoming = sorted.filter((x) => x.result === 'booked' && x.date && x.date >= t0).slice(0, 6);
   return (
     <>
-      <div className="pagehead">
-        <div><h1>验车服务</h1><p>顾客车辆先保养，再由我们负责送去验车 · 点车牌查看每辆车的流程</p></div>
-        {can('inspection.edit') && <button className="btn" type="button" onClick={() => setAdd(true)}><Icon name="plus" />登记验车</button>}
-      </div>
+      <section className="hero" aria-label="验车服务">
+        <div className="hero-text">
+          <h1>验车<br /><b>服务</b></h1>
+          <p>顾客车辆先保养，再由我们负责送去验车 · 点车牌查看每辆车的流程</p>
+          {can('inspection.edit') && <button className="btn" style={{ alignSelf: 'flex-start' }} type="button" onClick={() => setAdd(true)}><Icon name="plus" />登记验车</button>}
+        </div>
+        <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
+      </section>
       <div className="stats">
         <Stat n={`${n('booked')} 辆`} label="待验车" />
         <Stat n={`${n('unbooked')} 辆`} label="未预约验车日期" tone={n('unbooked') ? 'amber' : undefined} />
@@ -92,6 +97,7 @@ export default function Inspections() {
           />
         </section>
         <section className="card aside">
+          <Fold />
           <div className="col" style={{ gap: 4 }}><h2>近期验车日程</h2><span className="small muted">已同步到 Google 日历</span></div>
           {upcoming.length === 0 ? <p className="muted">没有已预约的验车</p> : upcoming.map((i) => {
             const w = wsOf(i);
