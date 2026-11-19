@@ -75,6 +75,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell" data-lang={prefs.lang}>
+      <div className="bgphoto" aria-hidden="true" />
       <header className="topnav noprint">
         <Link to="/" className="brand" aria-label={`${general.companyName} · 我的工作`}>
           <img className="logo-dark" src="/logo-white.png" alt="WEE HONG" />

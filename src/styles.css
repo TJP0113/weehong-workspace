@@ -446,6 +446,15 @@ html, body { overflow-x: clip; }
 .darkzone .btn:not(.ghost) { background: #D2F45C; color: #0B1A30; }
 .darkzone .banner { margin: 0; }
 
+
+/* faint workshop photo behind the top of every page (glass theme) */
+.shell { position: relative; }
+.bgphoto { display: none; }
+[data-theme='glass'] .bgphoto { display: block; position: absolute; top: 0; left: 50%; width: 100vw; height: 640px; transform: translateX(-50%); z-index: 0; pointer-events: none;
+  background: url('/bg-workshop.webp') center 38% / cover no-repeat; opacity: 0.2; filter: grayscale(0.35) contrast(0.9); mix-blend-mode: luminosity;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.75) 45%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.75) 45%, transparent 100%); }
+.shell > .main { position: relative; z-index: 1; }
+
 /* worksheet mobile action bar */
 .mobilebar { display: none; }
 @media (max-width: 760px) {
@@ -466,6 +475,7 @@ html, body { overflow-x: clip; }
   .home-hero .hero-col, .home-hero .hero-col.right { max-width: none; flex-basis: 100%; }
   .darkzone { padding: 20px 12px 40px; }
   .pager { margin-left: 0; }
+  [data-theme='glass'] .bgphoto { height: 460px; background-position: 44% 40%; opacity: 0.24; }
   .dsearch { flex: 1 1 100%; }
   .ddl { grid-template-columns: minmax(0, 1fr); }
   .home-hero.nophoto .hero-col.right { margin-left: 0; }
