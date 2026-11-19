@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { TRUCK_PHOTO } from '../components/TruckArt';
 import { useMyNotifications, useOpenWorksheets } from '../components/Layout';
-import { Empty, Fold, Loading, Pill, Stat, useUi } from '../components/ui';
+import { Empty, Fold, Loading, Pill, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { enablePush } from '../lib/notify';
 import { store, useCollection } from '../lib/store';
@@ -91,21 +91,41 @@ export default function Home() {
           {(role === 'admin' || role === 'warehouse') && <Link className="btn" style={{ alignSelf: 'flex-start' }} to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
         </div>
         <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
-      </section>
-      {data ? <div className="stats">{data.stats.map((s) => <Stat key={s.label} {...s} />)}</div> : <Loading n={1} />}
-      <div className="row">
-        <section className="card grow" aria-labelledby="todo">
-          <Fold />
-          <h2 id="todo">现在要处理</h2>
-          {!data ? <Loading /> : data.todos.length === 0 ? <Empty title="都处理完了" sub="新的工作会在这里出现，也会弹窗通知你" /> : data.todos.map((t, i) => (
-            <article key={i} className="sub" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px', borderLeft: `4px solid var(--${t.tone === 'grey' ? 'line' : t.tone})`, borderRadius: 16, padding: 16 }}>
-              <div className="col" style={{ flex: '1 1 240px', gap: 4 }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}><Pill tone={t.tone}>{t.tag}</Pill><b style={{ fontSize: '1.05rem' }}>{t.title}</b></div>
-                <span className="muted">{t.sub}</span>
+        <div className="hero-side">
+          <section className="card" aria-label="概况">
+            <Fold />
+            <h2>概况</h2>
+            {!data ? <Loading n={1} /> : (
+              <div className="bignums">
+                {data.stats.map((x) => {
+                  const inner = <><b className="num">{x.n.replace(/\s*\D+$/, '')}<small style={{ fontSize: '0.9rem', fontWeight: 600, marginLeft: 3 }}>{x.n.replace(/^[\d\s]+/, '')}</small></b><span>{x.label}</span></>;
+                  return x.href ? <Link key={x.label} to={x.href} className={x.tone || ''}>{inner}</Link> : <div key={x.label} className={x.tone || ''}>{inner}</div>;
+                })}
               </div>
-              <Link className="btn" to={t.href}>{t.cta}</Link>
-            </article>
-          ))}
+            )}
+          </section>
+        </div>
+      </section>
+
+      <div className="row">
+        <section className="darkband grow" aria-labelledby="todo">
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+            <h2 id="todo">现在要处理</h2>
+            <span className="kd">{data ? `${data.todos.length} 件` : ''}</span>
+          </div>
+          {!data ? <Loading /> : data.todos.length === 0 ? <Empty title="都处理完了" sub="新的工作会在这里出现，也会弹窗通知你" /> : (
+            <div className="wgrid">
+              {data.todos.map((t, i) => (
+                <article key={i} className="gdark">
+                  <span className="toneline" style={{ background: `var(--${t.tone === 'grey' ? 'grey' : t.tone})` }} />
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}><Pill tone={t.tone}>{t.tag}</Pill></div>
+                  <b style={{ fontSize: '1.08rem', lineHeight: 1.35 }}>{t.title}</b>
+                  <span className="kd">{t.sub}</span>
+                  <Link className="btn" to={t.href}>{t.cta}<Icon name="right" /></Link>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
         <section id="notifications" className="card aside" aria-labelledby="nt">
           <Fold />

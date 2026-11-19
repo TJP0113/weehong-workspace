@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { AddPartDialog } from '../components/AddPartDialog';
 import { FieldInput } from '../components/FieldInput';
 import { Icon } from '../components/Icon';
-import { TruckArt } from '../components/TruckArt';
+import { TRUCK_PHOTO } from '../components/TruckArt';
 import { Empty, ExpandList, Fold, Loading, Pill, useUi } from '../components/ui';
 import { addEntry, addPhoto, changeStatus, recountParts, review } from '../lib/actions';
 import { useApp } from '../lib/app';
@@ -107,39 +107,45 @@ export default function WorksheetDetail() {
 
   return (
     <>
-      <Link className="back noprint" to="/board"><Icon name="left" />工作表看板</Link>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 20px' }}>
-        <h1>工作表 {ws.no}</h1>
-        <ol aria-label="工作表进度" className="glassbar" style={{ listStyle: 'none', margin: 0, padding: 4, display: 'flex', flexWrap: 'wrap', gap: 6, background: 'var(--panel)', borderRadius: 999, border: '1px solid var(--line2)' }}>
+      <div className="wshead noprint">
+        <Link className="iconbtn" to="/board" aria-label="回到工作表看板"><Icon name="left" /></Link>
+        <span className="gchip num">{ws.no}</span>
+        <span className="gchip">{wsTypeLabel(ws.type)}</span>
+        <span className="gchip dark"><i style={{ background: `var(--${s.tone})` }} />{s.label}</span>
+        {ws.source && <Link className="gchip" to={ws.source.kind === 'inspection' ? `/inspections/${ws.source.id}` : `/rentals/${ws.machineCode || ''}`}><Icon name={ws.source.kind === 'inspection' ? 'insp' : 'rent'} size={14} />{ws.source.label} ›</Link>}
+        <span style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <a className="iconbtn" href={`/worksheets/${ws.id}/print`} target="_blank" rel="noreferrer" aria-label="打印 / PDF" title="打印 / PDF"><Icon name="print" /></a>
+          {ws.driveUrl && <a className="iconbtn" href={ws.driveUrl} target="_blank" rel="noreferrer" aria-label="Google Drive 文件夹" title="Google Drive 文件夹"><Icon name="folder" /></a>}
+        </span>
+      </div>
+
+      <section className="hero" aria-label="工作表概要">
+        <div className="hero-text">
+          <span className="k">{[ws.customer, ws.model, `建立于 ${fmtDate(ws.createdAt)} · ${ws.createdByName || ''}`].filter(Boolean).join(' · ')}</span>
+          <h1 className="plate-big">{ws.plate ? ws.plate.split(/\s+/).map((x, i) => <span key={i} style={{ display: 'block' }}>{x}</span>) : (ws.model || ws.no)}</h1>
+          <div className="chips">
+            <div className="infochip"><span>维修员</span><b>{ws.assigneeName || '未派工'}</b></div>
+            <div className={`infochip ${daysSince(ws.statusSince) > 5 && !closed ? 'red' : ''}`}><span>{s.label}</span><b>第 {daysSince(ws.statusSince) + 1} 天</b></div>
+            <div className={`infochip ${ws.waitingParts ? 'amber' : ''}`}><span>零件</span><b>{parts?.length ?? 0} 项{ws.waitingParts ? ` · ${ws.waitingParts} 待料` : ''}</b></div>
+            <div className="infochip"><span>维修事项</span><b>{entries?.length ?? 0} 条</b></div>
+          </div>
+        </div>
+        <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
+      </section>
+
+      <section className="card flow" aria-label="工作表流程">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><b>流程</b><span className="k num">{Math.min(flowIdx + 1, FLOW.length)} / {FLOW.length}</span></div>
+        <ol>
           {FLOW.map((k, i) => {
             const cur = i === flowIdx && !closed;
             const done = i < flowIdx || closed;
-            return (
-              <li key={k} aria-current={cur ? 'step' : undefined} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px 4px 4px', borderRadius: 999, fontSize: '0.87rem', background: cur ? 'var(--nav-on-bg)' : 'transparent', color: cur ? 'var(--nav-on-ink)' : 'var(--muted)', fontWeight: cur ? 600 : 400 }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', display: 'grid', placeItems: 'center', background: cur ? 'var(--nav-on-ink)' : done ? 'var(--green-bg)' : 'transparent', color: cur ? 'var(--nav-on-bg)' : 'var(--green-ink)', border: done || cur ? 0 : '1px solid var(--line)' }}>{done ? <Icon name="check" size={12} stroke={3} /> : i + 1}</span>
-                {FLOW_LABEL[i]}
-              </li>
-            );
+            return <li key={k} className={cur ? 'cur' : done ? 'done' : ''} aria-current={cur ? 'step' : undefined}><i /><span>{FLOW_LABEL[i]}</span></li>;
           })}
         </ol>
-        <span className="small muted" style={{ marginLeft: 'auto' }}>建立于 {fmtDate(ws.createdAt)} · {ws.createdByName}</span>
-      </div>
-      {(ws.source || ws.type) && (
-        <div className="chips" style={{ marginTop: -8 }}>
-          {ws.source && <Link className="btn ghost sm" to={ws.source.kind === 'inspection' ? `/inspections/${ws.source.id}` : `/rentals/${ws.machineCode || ''}`}><Icon name={ws.source.kind === 'inspection' ? 'insp' : 'rent'} />{ws.source.label} ›</Link>}
-          <span className="tag" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 38, padding: '0 12px', borderRadius: 10 }}>类型：{wsTypeLabel(ws.type)}</span>
-          {ws.driveUrl && <a className="btn ghost sm" href={ws.driveUrl} target="_blank" rel="noreferrer"><Icon name="folder" />Google Drive 文件夹</a>}
-        </div>
-      )}
+      </section>
 
       <div className="row">
         <div className="col grow" style={{ gap: 20 }}>
-          <div className="stats">
-            <div className="stat" style={{ background: 'var(--blue-bg)' }}><b style={{ color: 'var(--blue-ink)' }}>{s.label}</b><span style={{ color: 'var(--blue-ink)' }}>当前状态{ws.assigneeName ? ` · ${ws.assigneeName}` : ''}</span></div>
-            <div className={`stat ${daysSince(ws.statusSince) > 5 && !closed ? 'red' : ''}`}><b>{daysSince(ws.statusSince)} 天</b><span>在此状态停留</span></div>
-            <div className={`stat ${ws.waitingParts ? 'amber' : ''}`}><b>{parts?.length ?? 0} 项零件</b><span>{ws.waitingParts ? `其中 ${ws.waitingParts} 项待料` : '全部已领料'}</span></div>
-            <div className="stat"><b>{entries?.length ?? 0} 条事项</b><span>维修记录</span></div>
-          </div>
 
           <section className="card tight" aria-labelledby="parts-h">
             <Fold />
@@ -214,7 +220,6 @@ export default function WorksheetDetail() {
               <h2 id="car-h">车辆资料</h2>
               {ws.plate && <span className="plate">{ws.plate}</span>}
             </div>
-            <TruckArt />
             {editInfo ? (
               <div className="col" style={{ gap: 12 }}>
                 {enabled.map((f) => <FieldInput key={f.id} f={f} value={vals[f.id] ?? ws.fields[f.id] ?? ''} disabled={!canEditField(f.id)} onChange={(v) => setVals({ ...vals, [f.id]: v })} />)}
@@ -242,10 +247,16 @@ export default function WorksheetDetail() {
               <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { onPhoto(e.target.files?.[0]); e.target.value = ''; }} />
             </div>
           </section>
-          {nextBlock}
+          {!canNext && nextBlock}
         </aside>
       </div>
-      {canNext && <div className="mobilebar noprint"><button className="btn big" type="button" disabled={busy} onClick={doNext}>{next![1]}</button></div>}
+      {canNext && !closed && (
+        <div className="actionbar noprint" role="region" aria-label="下一步">
+          <span className="hint">{nextOwner ? `按下去会通知${roleLabel(nextOwner)}（手机和电脑弹窗）` : '下一步'}</span>
+          {ws.status === 'repairing' && (role === 'mechanic' || role === 'admin' || role === 'warehouse') && <button className="btn ghost" type="button" onClick={() => setWaiting(true)}>等待零件</button>}
+          <button className="btn" type="button" disabled={busy} onClick={doNext}>{next![1]}<Icon name="right" /></button>
+        </div>
+      )}
       {adding && parts && <AddPartDialog title={`${ws.no} · ${ws.plate || ws.model || ''}`} onClose={() => setAdding(false)} onAdd={async (ls) => {
         await Promise.all(ls.map((l) => store.add(`worksheets/${ws.id}/parts`, l)));
         await recountParts(ws.id, [...parts, ...ls.map((l, i) => ({ ...l, id: `n${i}` }))]);
