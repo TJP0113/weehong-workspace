@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { GlassStat, PageHero } from '../components/glass';
 import { Banner, ExpandList, Loading, Stat, Two, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { DEMO } from '../lib/firebase';
@@ -39,21 +40,21 @@ export default function Parts() {
   };
   return (
     <>
-      <div className="pagehead">
-        <div><h1>零件库</h1><p>零件全部来自 AutoCount{ac?.lastSuccess ? `（最近同步 ${fmtTime(ac.lastSuccess)}）` : ''}；前后、左右等位置区分在本系统设定</p></div>
-        <div className="chips">
+      <PageHero label="零件库" photo={false}
+        kicker={<span className="datechip">零件全部来自 AutoCount{ac?.lastSuccess ? ` · 最近同步 ${fmtTime(ac.lastSuccess)}` : ''}</span>}
+        title={<>AutoCount<br />零件库</>}
+        sub="前后、左右等位置区分在本系统设定，不会改动 AutoCount"
+        actions={<>
           <button className="btn ghost" type="button" disabled={syncing} onClick={sync}><Icon name="sync" />{syncing ? '同步中…' : '立即同步'}</button>
           {can('settings.edit') && <Link className="btn" to="/settings/positions"><Icon name="set" />设定位置区分</Link>}
-        </div>
-      </div>
-      <AutoCountBanner />
-      {parts && (
-        <div className="stats">
-          <Stat n={`${parts.length} 项`} label="AutoCount 零件" />
-          <Stat n={`${parts.filter((p) => (p.groups || []).length).length} 项`} label="已设位置区分" />
-          <Stat n={`${parts.filter((p) => p.stock === 0).length} 项`} label="AutoCount 库存为 0" tone={parts.some((p) => p.stock === 0) ? 'amber' : undefined} />
-        </div>
-      )}
+        </>}
+        left={<AutoCountBanner />}
+        side={parts && <GlassStat title="零件概况" items={[
+          { n: parts.length, unit: '项', label: 'AutoCount 零件', onClick: () => setTab('all'), on: tab === 'all' },
+          { n: parts.filter((p) => (p.groups || []).length).length, unit: '项', label: '已设位置', onClick: () => setTab('pos'), on: tab === 'pos' },
+          { n: parts.filter((p) => p.stock === 0).length, unit: '项', label: '库存为 0', tone: parts.some((p) => p.stock === 0) ? 'amber' : undefined },
+        ]} />}
+      />
       <section className="card tight">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', padding: '10px 10px 14px' }}>
           <div className="seg" role="tablist">

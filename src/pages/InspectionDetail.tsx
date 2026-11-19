@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { TRUCK_PHOTO } from '../components/TruckArt';
 import { Empty, Fold, Loading, Pill } from '../components/ui';
 import { useApp } from '../lib/app';
 import { useCollection, useDoc } from '../lib/store';
@@ -43,12 +44,24 @@ export default function InspectionDetail() {
 
   return (
     <>
-      <Link className="back" to="/inspections"><Icon name="left" />验车服务</Link>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
-        <span className="plate lg">{i.plate}</span>
-        <h1 style={{ fontSize: '1.75rem' }}>{i.customer}{i.model ? ` · ${i.model}` : ''}</h1>
-        <Pill tone={RESULT[i.result][1]}>{failed && i.result === 'booked' ? `待复验 · ${fmtMD(i.date)}` : RESULT[i.result][0]}</Pill>
+      <div className="wshead">
+        <Link className="iconbtn" to="/inspections" aria-label="回到验车服务"><Icon name="left" /></Link>
+        <span className="gchip">验车服务</span>
+        <span className="gchip dark"><i style={{ background: `var(--${failed && i.result !== 'pass' ? 'red' : RESULT[i.result][1]})` }} />{failed && i.result === 'booked' ? `待复验 · ${fmtMD(i.date)}` : RESULT[i.result][0]}</span>
+        {(i.attempt || 1) > 1 && <span className="gchip">第 {i.attempt} 次</span>}
       </div>
+      <section className="hero" aria-label="车辆概要">
+        <div className="hero-text">
+          <span className="k">{[i.customer, i.model, `送车 ${fmtDate(i.receivedAt)}`].filter(Boolean).join(' · ')}</span>
+          <h1 className="plate-big">{i.plate.split(/\s+/).map((x, n) => <span key={n} style={{ display: 'block' }}>{x}</span>)}</h1>
+          <div className="chips">
+            <div className="infochip"><span>验车日期</span><b>{i.date ? fmtMD(i.date) : '未预约'}</b></div>
+            {i.place && <div className="infochip"><span>地点</span><b>{i.place}</b></div>}
+            <div className="infochip"><span>保养工作表</span><b>{linked.length ? `${linked.length} 张` : '还没开'}</b></div>
+          </div>
+        </div>
+        <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
+      </section>
       <div className="row">
         <section className="card grow">
           <Fold />

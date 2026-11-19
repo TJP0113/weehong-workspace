@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { GlassStat, PageHero } from '../components/glass';
 import { Fold, Loading } from '../components/ui';
 import { useCollection, useDoc } from '../lib/store';
 import type { Inspection, Machine, RentalOrder, Trip } from '../lib/types';
@@ -12,7 +13,7 @@ const COLORS: Record<Kind, [string, string]> = {
   验车: ['var(--blue-bg)', 'var(--blue-ink)'],
   租期结束: ['var(--red-bg)', 'var(--red-ink)'],
   出租交机: ['var(--green-bg)', 'var(--green-ink)'],
-  运输: ['var(--grey-bg)', 'var(--ink2)'],
+  运输: ['#E6EAF0', '#2E3E57'],
 };
 interface Ev { date: string; kind: Kind; title: string; detail: string; href: string }
 
@@ -51,17 +52,18 @@ export default function CalendarPage() {
   const t0 = today();
   return (
     <>
-      <div className="pagehead">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h1>日历</h1>
+      <PageHero label="日历" photo={false}
+        kicker={<span className="datechip">保养、验车、租期、交机、运输都在这里，并同步到 Google 日历</span>}
+        title={<>{month.getFullYear()} 年<br /><b>{month.getMonth() + 1} 月</b></>}
+        actions={<>
           <button className="iconbtn" type="button" aria-label="上个月" onClick={() => shift(-1)}><Icon name="left" /></button>
-          <b style={{ minWidth: 120, textAlign: 'center', fontSize: '1.1rem' }}>{month.getFullYear()} 年 {month.getMonth() + 1} 月</b>
           <button className="iconbtn" type="button" aria-label="下个月" onClick={() => shift(1)}><Icon name="right" /></button>
-          <button className="btn ghost sm" type="button" onClick={() => { const d = new Date(); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); setSel(t0); }}>今天</button>
-        </div>
-        <a className="btn ghost" href={google?.google?.calendarUrl || 'https://calendar.google.com'} target="_blank" rel="noreferrer"><Icon name="ext" />在 Google 日历中打开</a>
-      </div>
-      <div className="chips" role="group" aria-label="显示的事件类型">
+          <button className="btn" type="button" onClick={() => { const d = new Date(); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); setSel(t0); }}>今天</button>
+          <a className="btn ghost" href={google?.google?.calendarUrl || 'https://calendar.google.com'} target="_blank" rel="noreferrer"><Icon name="ext" />Google 日历</a>
+        </>}
+        side={<GlassStat title="这个月" items={(Object.keys(COLORS) as Kind[]).filter((k) => k !== '出租交机').map((k) => ({ n: events.filter((e) => e.kind === k && e.date.slice(0, 7) === localDate(month).slice(0, 7)).length, label: k, tone: k === '租期结束' ? 'red' as const : k === '保养' ? 'amber' as const : undefined }))} />}
+      />
+      <div className="chips tonechips" role="group" aria-label="显示的事件类型">
         {(Object.keys(COLORS) as Kind[]).map((k) => {
           const on = !off.includes(k);
           return <button key={k} type="button" aria-pressed={on} onClick={() => setOff(on ? [...off, k] : off.filter((x) => x !== k))} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 40, padding: '0 14px', borderRadius: 999, border: `1.5px solid ${on ? COLORS[k][1] : 'var(--line)'}`, background: on ? COLORS[k][0] : 'transparent', color: on ? 'var(--ink)' : 'var(--muted)', cursor: 'pointer' }}><span style={{ width: 10, height: 10, borderRadius: 3, background: COLORS[k][1] }} />{k}<span className="muted">{events.filter((e) => e.kind === k && e.date.slice(0, 7) === localDate(month).slice(0, 7)).length}</span></button>;

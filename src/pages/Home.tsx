@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { TRUCK_PHOTO } from '../components/TruckArt';
+import { WsCard } from '../components/glass';
 import { useMyNotifications, useOpenWorksheets } from '../components/Layout';
 import { Empty, Fold, Loading, Pill, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { enablePush } from '../lib/notify';
 import { store, useCollection } from '../lib/store';
-import { wsTypeLabel, type Inspection, type Machine, type Part, type RentalOrder, type Tone, type Trip, type Worksheet, type WsPart } from '../lib/types';
+import { wsTypeLabel, type Inspection, type Machine, type Part, type RentalOrder, type Tone, type Trip, type Worksheet } from '../lib/types';
 import { daysBetween, daysSince, fmtMD, fmtTime, fmtWeekday, statusOf, today } from '../lib/utils';
 
 interface Todo { tone: Tone; tag: string; title: string; sub: string; cta: string; href: string }
@@ -243,44 +244,5 @@ export default function Home() {
         )}
       </section>
     </>
-  );
-}
-
-const PROGRESS: Record<string, number> = { pending: 0, repairing: 40, waiting_parts: 30, repaired: 60, clerk: 75, review: 90, closed: 100 };
-
-function WsCard({ w, open, onToggle, late }: { w: Worksheet; open: boolean; onToggle: () => void; late: boolean }) {
-  const { statuses } = useApp();
-  const st = statusOf(statuses, w.status);
-  const parts = useCollection<WsPart>(open ? `worksheets/${w.id}/parts` : null);
-  const pct = PROGRESS[w.status] ?? 0;
-  const tags = [wsTypeLabel(w.type), w.waitingParts ? `${w.waitingParts} 项待料` : '', w.source?.kind === 'inspection' ? w.source.label.replace(/^验车服务 · /, '') : ''].filter(Boolean);
-  return (
-    <article className="gdark wscard">
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-        <span className="dplate">{w.plate || w.machineCode || '—'}</span>
-        <div className="two" style={{ flex: 1 }}><b className="ell" style={{ fontSize: '1rem' }}>{w.model || w.no}</b><span className="kd ell">{w.customer} · {st.label}第 {daysSince(w.statusSince) + 1} 天</span></div>
-        <button className="dbtn sm" type="button" aria-expanded={open} aria-label={`${open ? '收起' : '展开'} ${w.no}`} onClick={onToggle}><Icon name={open ? 'minus' : 'plus'} size={16} stroke={2.2} /></button>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div className="col" style={{ flex: 1, gap: 10 }}>
-          <div className="chips" style={{ gap: 6 }}>{tags.map((t) => <span key={t} className="dchip">{t}</span>)}</div>
-          <span className="kd" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><i style={{ width: 8, height: 8, borderRadius: '50%', background: late ? 'var(--red)' : `var(--${st.tone})` }} />{st.label} · {w.assigneeName || '未派工'}</span>
-        </div>
-        <div className="ring" style={{ background: `conic-gradient(#D2F45C ${pct}%, rgba(255,255,255,0.1) 0)` }} role="img" aria-label={`进度 ${pct}%`}>
-          <span><b>{pct}%</b><small>进度</small></span>
-        </div>
-      </div>
-      {open && (
-        <div className="col" style={{ gap: 8, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          {!parts ? <span className="kd">载入零件…</span> : parts.length === 0 ? <span className="kd">还没有零件</span> : parts.map((p) => (
-            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: '0.9rem' }}>
-              <span className="ell">{p.name} <span className="kd">{p.position || ''}</span></span>
-              <span style={{ color: p.state === 'waiting' ? '#F0C77A' : '#7FD8AA', flex: 'none' }}>{p.state === 'waiting' ? '待料' : '已领料'}</span>
-            </div>
-          ))}
-          <Link className="btn" style={{ alignSelf: 'stretch' }} to={`/worksheets/${w.id}`}>打开工作表</Link>
-        </div>
-      )}
-    </article>
   );
 }

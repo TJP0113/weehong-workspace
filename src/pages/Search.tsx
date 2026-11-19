@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { PageHero } from '../components/glass';
 import { Loading, Pill } from '../components/ui';
 import { useApp } from '../lib/app';
 import { useCollection } from '../lib/store';
@@ -33,6 +34,7 @@ export default function Search() {
   const total = groups.reduce((n, g) => n + g.items.length, 0);
   return (
     <>
+      <PageHero label="搜索" photo={false} title={<>全局<br />搜索</>} />
       <form className="col" style={{ gap: 8 }} onSubmit={(e) => { e.preventDefault(); setParams({ q }); }}>
         <label className="searchbox" style={{ maxWidth: 'none', height: 60, border: '1.5px solid var(--accent)' }}>
           <Icon name="search" size={20} />

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { ExpandList, Fold, Loading, Modal, Pill, Stat, Two, useUi } from '../components/ui';
+import { DarkCard, DarkZone, DGrid, DSearch, DSeg, FSelect, GlassStat, LimeAdd, PageHero, Ring, usePaged } from '../components/glass';
+import { Fold, Loading, Modal, useUi } from '../components/ui';
 import { nextNo } from '../lib/actions';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
@@ -16,83 +17,116 @@ export default function Rentals() {
   const { can } = useApp();
   const machines = useCollection<Machine>('machines', { orderBy: ['code', 'asc'] });
   const orders = useCollection<RentalOrder>('rentalOrders', { where: [['step', '<=', 3]] });
-  const [tab, setTab] = useState('all');
-  const [src, setSrc] = useState('all');
+  const [view, setView] = useState<'machines' | 'orders'>('machines');
+  const [tab, setTab] = useState('');
+  const [src, setSrc] = useState('');
+  const [kind, setKind] = useState('');
   const [q, setQ] = useState('');
+  const [openId, setOpenId] = useState<string | null>(null);
   const [newOrder, setNewOrder] = useState(false);
-  if (!machines || !orders) return <Loading />;
-  const n = (s: string) => machines.filter((m) => m.status === s).length;
+  const all = machines || [];
+  const n = (st: string) => all.filter((m) => m.status === st).length;
   const t0 = today();
-  const due = machines.filter((m) => m.provider === 'own' && m.nextMaintenance && daysBetween(t0, m.nextMaintenance) <= 30).sort((a, b) => (a.nextMaintenance! > b.nextMaintenance! ? 1 : -1));
-  const list = machines.filter((m) => (tab === 'all' || m.status === tab) && (src === 'all' || m.provider === src) && includesAny([m.code, m.name, m.serial, m.client, m.kind], q));
+  const due = all.filter((m) => m.provider === 'own' && m.nextMaintenance && daysBetween(t0, m.nextMaintenance) <= 30).sort((a, b) => (a.nextMaintenance! > b.nextMaintenance! ? 1 : -1));
+  const ending = all.filter((m) => m.status === 'rented' && m.rentEnd && daysBetween(t0, m.rentEnd) >= 0 && daysBetween(t0, m.rentEnd) <= 7).sort((a, b) => (a.rentEnd! > b.rentEnd! ? 1 : -1));
+  const list = all.filter((m) => (!tab || m.status === tab) && (!src || m.provider === src) && (!kind || m.kind === kind) && includesAny([m.code, m.name, m.serial, m.client, m.kind], q))
+    .sort((a, b) => ((a.status === 'rented' ? a.rentEnd || '9' : '9' + a.code) > (b.status === 'rented' ? b.rentEnd || '9' : '9' + b.code) ? 1 : -1));
+  const { shown, pager, reset } = usePaged(list, 12);
+  const kinds = [...new Set(all.map((m) => m.kind).filter(Boolean))] as string[];
+  const thisMonth = due.filter((m) => m.nextMaintenance!.slice(0, 7) === t0.slice(0, 7)).length;
   return (
     <>
-      <div className="pagehead">
-        <div><h1>机械租赁管理</h1><p>公司有 {machines.length} 台机械，{n('rented')} 台正在外面出租 · 机械资料来自 AutoCount</p></div>
-        {can('rent.order') && <button className="btn" type="button" onClick={() => setNewOrder(true)}><Icon name="plus" />新租赁订单</button>}
-      </div>
-      <AutoCountBanner />
-      <div className="stats">
-        <Stat n={`${n('rented')} 台`} label="在出租" />
-        <Stat n={`${n('idle')} 台`} label="在闲置" />
-        <Stat n={`${n('repair')} 台`} label="在维修" />
-        <Stat n={`${due.filter((m) => m.nextMaintenance!.slice(0, 7) === t0.slice(0, 7)).length} 台`} label="本月要保养" tone={due.length ? 'amber' : undefined} />
-      </div>
-      <section className="card tight">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', padding: '10px 10px 14px' }}>
-          <div className="seg" role="tablist">{[['all', `全部 ${machines.length}`], ['rented', `在出租 ${n('rented')}`], ['idle', `在闲置 ${n('idle')}`], ['repair', `在维修 ${n('repair')}`]].map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
-          <div className="seg" role="group" aria-label="来源">{[['all', '全部来源'], ['own', '本公司'], ['supplier', '供应商']].map(([k, l]) => <button key={k} type="button" aria-pressed={src === k} className={src === k ? 'on' : ''} onClick={() => setSrc(k)}>{l}</button>)}</div>
-          <label className="searchbox" style={{ maxWidth: 280, height: 40 }}><Icon name="search" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="代号、系列号码、租赁公司" aria-label="搜索机械" /></label>
-        </div>
-        <ExpandList rows={list} cols="minmax(0,1.4fr) minmax(0,0.9fr) minmax(0,1.6fr) minmax(0,0.9fr)" head={['机械', '状态', '租赁公司 · 地点', '租期至']}
-          summary={(m) => <>
-            <Two a={m.code} b={`${m.name} · ${m.kind}`} />
-            <span><Pill tone={M_STATUS[m.status]?.[1]}>{M_STATUS[m.status]?.[0]}</Pill></span>
-            <Two a={m.client || '—'} b={m.location} />
-            <span className="num ell" style={{ color: m.rentEnd && daysBetween(t0, m.rentEnd) <= 7 && m.status === 'rented' ? 'var(--amber-ink)' : undefined }}>{m.status === 'rented' ? fmtDate(m.rentEnd) : '—'}</span>
-          </>}
-          detail={(m) => <>
-            <dl className="dgrid">
-              <div><dt>系列号码</dt><dd className="num">{m.serial || '—'}</dd></div>
-              <div><dt>提供方</dt><dd><span className="tag">{m.provider === 'own' ? '本公司' : `供应商 · ${m.supplierName || ''}`}</span></dd></div>
-              <div><dt>租赁期</dt><dd className="num">{m.status === 'rented' ? `${fmtDate(m.rentStart)} → ${fmtDate(m.rentEnd)}` : '—'}</dd></div>
-              <div><dt>性质</dt><dd>{m.rate ? `按${RATE_LABEL[m.rate]}` : '—'}</dd></div>
-              <div><dt>下次保养</dt><dd className="num">{m.provider === 'own' ? fmtDate(m.nextMaintenance) : '供应商负责'}</dd></div>
-            </dl>
-            <div className="chips">
-              <Link className="btn sm" to={`/rentals/${m.code}`}>查看详情{m.status === 'rented' && can('rent.renew') ? ' / 续租' : ''}</Link>
-              {m.provider === 'own' && <Link className="btn ghost sm" to={`/worksheets/new?machine=${m.code}&type=maintenance`}>开保养工作表</Link>}
+      <PageHero label="机械租赁"
+        kicker={<span className="datechip">共 {all.length} 台机械 · 资料来自 AutoCount</span>}
+        title={<>租出<br /><b>{n('rented')}</b> 台</>}
+        actions={can('rent.order') && <button className="btn" type="button" onClick={() => setNewOrder(true)}><Icon name="plus" />新租赁订单</button>}
+        left={<>
+          <AutoCountBanner />
+          <GlassStat title="机队状况" items={[
+            { n: n('rented'), unit: '台', label: '在出租', onClick: () => { setView('machines'); setTab('rented'); reset(); }, on: tab === 'rented' },
+            { n: n('idle'), unit: '台', label: '在闲置', onClick: () => { setView('machines'); setTab('idle'); reset(); }, on: tab === 'idle' },
+            { n: n('repair'), unit: '台', label: '在维修', tone: n('repair') ? 'amber' : undefined, onClick: () => { setView('machines'); setTab('repair'); reset(); }, on: tab === 'repair' },
+          ]}>
+            <div className="fleetbar" aria-hidden="true">{[['rented', '#0B1A30'], ['idle', '#D2F45C'], ['repair', '#F0A43A']].map(([k, c]) => <i key={k} style={{ flex: n(k) || 0.0001, background: c }} />)}</div>
+          </GlassStat>
+        </>}
+        side={<>
+          <section className="card" aria-label="7 天内到期">
+            <Fold />
+            <h2>7 天内到期</h2>
+            {ending.length === 0 ? <p className="k" style={{ margin: 0 }}>7 天内没有租期到期的机械</p> : ending.map((m) => (
+              <div key={m.code} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 8, borderTop: '1px solid var(--sep)' }}>
+                <b className="bigone num" style={{ width: 40, fontSize: '1.9rem' }}>{daysBetween(t0, m.rentEnd!)}</b>
+                <div className="two" style={{ flex: 1 }}><b className="ell">{m.code} · {m.name}</b><span className="ell">{m.client} · {fmtMD(m.rentEnd)}</span></div>
+                {can('rent.renew') && <Link className="btn sm" to={`/rentals/${m.code}`}>续租</Link>}
+              </div>
+            ))}
+          </section>
+          <section className="card" aria-label="本月保养">
+            <Fold />
+            <h2>本月保养</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div className="ring light" style={{ background: `conic-gradient(#0B1A30 ${due.length ? Math.round(((due.length - thisMonth) / Math.max(1, due.length)) * 100) : 100}%, rgba(255,255,255,0.55) 0)` }}><span><b>{thisMonth}</b><small>台</small></span></div>
+              <div className="two"><b>本月还要保养 {thisMonth} 台</b><span>30 天内共 {due.length} 台 · 供应商机械由供应商负责</span></div>
             </div>
-          </>}
-        />
-        <p className="small muted" style={{ margin: '14px 16px 2px' }}>机械代号、名称、种类、系列号码、提供方、租赁公司名来自 AutoCount（只读）；状态、地点、租期、性质和保养由本系统记录。</p>
-      </section>
-      <div className="row">
-        <section className="card aside" style={{ flexBasis: 420 }}>
-          <Fold />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}><h2>保养提醒（30 天内）</h2><span className="small muted">本公司机械每月一次 · 供应商机械由供应商负责</span></div>
-          {due.length === 0 ? <p className="muted">30 天内没有要保养的机械</p> : due.map((m) => (
-            <div key={m.code} className="sub" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 52, textAlign: 'center' }}><b style={{ fontSize: '1.2rem', color: daysBetween(t0, m.nextMaintenance!) <= 3 ? 'var(--amber-ink)' : undefined }}>{Number(m.nextMaintenance!.slice(8))}</b><div className="small muted">{Number(m.nextMaintenance!.slice(5, 7))} 月</div></div>
-              <Two a={`${m.code} · ${m.name}`} b={`${M_STATUS[m.status][0]} · ${m.status === 'rented' ? `派人到现场 · ${m.location}` : `公司内保养 · ${m.location || ''}`}`} />
-              <Link className="btn ghost sm" style={{ marginLeft: 'auto' }} to={`/worksheets/new?machine=${m.code}&type=maintenance`}>开保养工作表</Link>
+          </section>
+        </>}
+      />
+      <DarkZone label="机械与订单" bar={<>
+        <DSeg value={view} onChange={(k) => { setView(k); setOpenId(null); }} tabs={[{ k: 'machines', l: '机械', n: all.length }, { k: 'orders', l: '租赁订单', n: (orders || []).length }, ]} />
+        {view === 'machines' && <>
+          <FSelect label="状态" value={tab} onChange={(v) => { setTab(v); reset(); }} all="状态：全部" options={Object.entries(M_STATUS).map(([k, [l]]) => ({ v: k, l }))} />
+          <FSelect label="种类" value={kind} onChange={(v) => { setKind(v); reset(); }} all="全部种类" options={kinds.map((k) => ({ v: k, l: k }))} />
+          <FSelect label="来源" value={src} onChange={(v) => { setSrc(v); reset(); }} all="全部来源" options={[{ v: 'own', l: '本公司' }, { v: 'supplier', l: '供应商' }]} />
+          <DSearch value={q} onChange={(v) => { setQ(v); reset(); }} placeholder="代号、系列号码、租赁公司" />
+        </>}
+        {can('rent.order') && <LimeAdd onClick={() => setNewOrder(true)} label="新租赁订单" />}
+        {view === 'machines' && pager}
+      </>}>
+        {!machines || !orders ? <Loading /> : view === 'machines' ? (
+          shown.length === 0 ? <p className="kd" style={{ margin: 0 }}>没有符合的机械</p> : <>
+            <div className="wgrid">
+              {shown.map((m) => {
+                const rented = m.status === 'rented' && m.rentStart && m.rentEnd;
+                const total = rented ? Math.max(1, daysBetween(m.rentStart!, m.rentEnd!)) : 1;
+                const left = rented ? daysBetween(t0, m.rentEnd!) : 0;
+                const soon = rented && left <= 7;
+                const st = M_STATUS[m.status] || ['—', 'grey'];
+                return (
+                  <DarkCard key={m.code} plate={m.code} title={m.name} sub={`${m.kind || ''} · ${m.client || m.location || '公司场地'}`}
+                    chips={[soon ? '快到期' : '', m.provider === 'own' ? '本公司' : `供应商${m.supplierName ? ` · ${m.supplierName}` : ''}`, m.rate ? `按${RATE_LABEL[m.rate]}` : '']}
+                    dot={`var(--${st[1]})`} meta={`${st[0]}${rented ? ` · 到 ${fmtMD(m.rentEnd)}` : m.location ? ` · ${m.location}` : ''}`}
+                    ring={rented ? <Ring pct={(left / total) * 100} big={left} small="天" color={soon ? '#F0A43A' : undefined} /> : <Ring pct={0} big={st[0].replace('在', '')} small="状态" />}
+                    alert={!!soon} open={openId === m.code} onToggle={() => setOpenId(openId === m.code ? null : m.code)}>
+                    <DGrid rows={[['系列号码', m.serial || '—'], ['租赁期', rented ? `${fmtDate(m.rentStart)} → ${fmtDate(m.rentEnd)}` : '—'], ['地点', m.location || '—'], ['下次保养', m.provider === 'own' ? fmtDate(m.nextMaintenance) : '供应商负责']]} />
+                    <div className="chips">
+                      <Link className="btn" style={{ flex: 1 }} to={`/rentals/${m.code}`}>{m.status === 'rented' && can('rent.renew') ? '续租 / 详情' : '查看详情'}</Link>
+                      {m.provider === 'own' && <Link className="btn ghost" to={`/worksheets/new?machine=${m.code}&type=maintenance`}>开保养工作表</Link>}
+                    </div>
+                  </DarkCard>
+                );
+              })}
             </div>
-          ))}
-        </section>
-        <section className="card aside" style={{ flexBasis: 420 }}>
-          <Fold />
-          <h2>进行中的租赁订单</h2>
-          {orders.length === 0 ? <p className="muted">没有进行中的订单</p> : orders.map((o) => (
-            <Link key={o.id} to={`/rentals/${o.machineCode}`} className="sub col" style={{ gap: 10, textDecoration: 'none' }}>
-              <span className="small muted num">{o.no} · {fmtMD(o.createdAt)}</span>
-              <b>{o.client}</b>
-              <span className="small">{o.machineCode} {o.machineName} · {fmtMD(o.start)} 起 · 按{RATE_LABEL[o.rate]}</span>
-              <OrderBar step={o.step} />
-            </Link>
-          ))}
-        </section>
-      </div>
-      {newOrder && <NewOrderDialog machines={machines} onClose={() => setNewOrder(false)} />}
+            <p className="kd" style={{ margin: 0 }}>机械代号、名称、种类、系列号码、提供方、租赁公司名来自 AutoCount（只读）；状态、地点、租期、性质和保养由本系统记录。</p>
+          </>
+        ) : (
+          orders.length === 0 ? <p className="kd" style={{ margin: 0 }}>没有进行中的订单</p> : (
+            <div className="wgrid">
+              {orders.map((o) => (
+                <DarkCard key={o.id} plate={o.machineCode} title={o.client} sub={`${o.no} · ${o.machineName}`}
+                  chips={[`${fmtMD(o.start)} 起`, `按${RATE_LABEL[o.rate]}`, o.mechanicName ? `检查：${o.mechanicName}` : '未委派维修员']}
+                  dot="var(--blue)" meta={`现在：${ORDER_STEPS[o.step] || ''}`}
+                  ring={<Ring pct={(o.step / (ORDER_STEPS.length - 1)) * 100} big={`${o.step + 1}/${ORDER_STEPS.length}`} small="步骤" />}
+                  open={openId === o.id} onToggle={() => setOpenId(openId === o.id ? null : o.id)}>
+                  <DGrid rows={[['租期', `${fmtDate(o.start)} → ${fmtDate(o.end)}`], ['地点', o.location || '—'], ['建立', fmtMD(o.createdAt)]]} />
+                  <Link className="btn" to={`/rentals/${o.machineCode}`}>处理订单</Link>
+                </DarkCard>
+              ))}
+            </div>
+          )
+        )}
+      </DarkZone>
+      {newOrder && machines && <NewOrderDialog machines={machines} onClose={() => setNewOrder(false)} />}
     </>
   );
 }

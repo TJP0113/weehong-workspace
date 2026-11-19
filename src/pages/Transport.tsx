@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { GlassStat, PageHero } from '../components/glass';
 import { Empty, Fold, Loading, Modal, Pill, useUi } from '../components/ui';
 import { nextNo } from '../lib/actions';
 import { useApp } from '../lib/app';
@@ -46,10 +47,18 @@ export default function Transport() {
 
   return (
     <>
-      <div className="pagehead">
-        <div><h1>交通运输</h1><p>安排员工去多个地点取货、送货、交机或现场保养，按顺序用 Google Maps 导航</p></div>
-        {edit && <button className="btn" type="button" onClick={() => setNewTrip(null)}><Icon name="plus" />新增行程</button>}
-      </div>
+      <PageHero label="交通运输"
+        kicker={<span className="datechip">{fmtMD(t0)} · {fmtWeekday(t0)}</span>}
+        title={<>交通<br />运输</>}
+        sub="安排员工去多个地点取货、送货、交机或现场保养，按顺序用 Google Maps 导航"
+        actions={edit && <button className="btn" type="button" onClick={() => setNewTrip(null)}><Icon name="plus" />新增行程</button>}
+        side={<GlassStat title={tab === 'done' ? '已完成行程' : tab === 'today' ? '今天' : '这一周'} items={[
+          { n: list.length, unit: '趟', label: '行程' },
+          { n: list.filter((x) => x.status === 'active').length, unit: '趟', label: '进行中' },
+          { n: list.filter((x) => x.date === t0).length, unit: '趟', label: '今天' },
+          { n: list.reduce((a, x) => a + x.stops.length, 0), unit: '个', label: '地点' },
+        ]} />}
+      />
       <div className="row">
         <section className="card aside" style={{ padding: 14, flexBasis: 300 }}>
           <div className="seg" role="tablist">{(['week', 'today', 'done'] as const).map((k) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} style={{ flex: 1 }} onClick={() => { setTab(k); setSel(null); }}>{{ week: '本周', today: '今天', done: '已完成' }[k]}</button>)}</div>

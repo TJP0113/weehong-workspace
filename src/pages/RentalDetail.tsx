@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { TRUCK_PHOTO } from '../components/TruckArt';
 import { Empty, Fold, Loading, Modal, Pill, useUi } from '../components/ui';
 import { useApp } from '../lib/app';
 import { notify } from '../lib/notify';
@@ -47,11 +48,25 @@ export default function RentalDetail() {
   const stepWho = ['管理员', '维修员；货仓管理员开工作表', '文员 · 开单在系统外完成', '系统自动'];
   return (
     <>
-      <Link className="back" to="/rentals"><Icon name="left" />机械租赁管理</Link>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
-        <h1>{m.code} · {m.name}</h1>
-        <Pill tone={M_STATUS[m.status][1]}>{M_STATUS[m.status][0]}</Pill>
+      <div className="wshead">
+        <Link className="iconbtn" to="/rentals" aria-label="回到机械租赁"><Icon name="left" /></Link>
+        <span className="gchip">{m.kind || '机械'}</span>
+        <span className="gchip dark"><i style={{ background: `var(--${M_STATUS[m.status][1]})` }} />{M_STATUS[m.status][0]}</span>
+        <span className="gchip">{m.provider === 'own' ? '本公司' : `供应商${m.supplierName ? ` · ${m.supplierName}` : ''}`}</span>
       </div>
+      <section className="hero" aria-label="机械概要">
+        <div className="hero-text">
+          <span className="k">{[m.name, m.serial && `系列号 ${m.serial}`, m.location].filter(Boolean).join(' · ')}</span>
+          <h1 className="plate-big">{m.code}</h1>
+          <div className="chips">
+            <div className="infochip"><span>租赁公司</span><b>{m.client || '—'}</b></div>
+            <div className="infochip"><span>租期至</span><b>{m.status === 'rented' ? fmtDate(m.rentEnd) : '—'}</b></div>
+            <div className="infochip"><span>性质</span><b>{m.rate ? `按${RATE_LABEL[m.rate]}` : '—'}</b></div>
+            <div className="infochip"><span>下次保养</span><b>{m.provider === 'own' ? fmtDate(m.nextMaintenance) : '供应商负责'}</b></div>
+          </div>
+        </div>
+        <div className="hero-photo"><img src={TRUCK_PHOTO} alt="" width={1280} height={487} /></div>
+      </section>
       <div className="row">
         <section className="card grow">
           {active ? (

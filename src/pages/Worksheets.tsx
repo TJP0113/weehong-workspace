@@ -1,56 +1,54 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icon';
-import { ExpandList, Loading, StatusPill, Two } from '../components/ui';
+import { DarkZone, DSearch, DSeg, FSelect, GlassStat, LimeAdd, PageHero, usePaged, WsCard } from '../components/glass';
+import { Loading } from '../components/ui';
 import { useApp } from '../lib/app';
 import { useCollection } from '../lib/store';
-import { wsTypeLabel, type Worksheet } from '../lib/types';
-import { daysSince, fmtDate, includesAny, statusOf } from '../lib/utils';
+import { WS_TYPES, type Worksheet } from '../lib/types';
+import { daysSince, includesAny, today } from '../lib/utils';
 
 export default function Worksheets() {
-  const { statuses, can } = useApp();
+  const { can, general } = useApp();
   const [tab, setTab] = useState<'open' | 'closed'>('open');
   const [q, setQ] = useState('');
-  const rows = useCollection<Worksheet>('worksheets', tab === 'open' ? { where: [['status', '!=', 'closed']] } : { where: [['status', '==', 'closed']], orderBy: ['updatedAt', 'desc'], limit: 200 });
-  const list = (rows || []).filter((w) => includesAny([w.no, w.plate, w.customer, w.model, w.serial], q)).sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  const [typeF, setTypeF] = useState('');
+  const [openId, setOpenId] = useState<string | null>(null);
+  const openRows = useCollection<Worksheet>('worksheets', { where: [['status', '!=', 'closed']] });
+  const closedRows = useCollection<Worksheet>('worksheets', { where: [['status', '==', 'closed']], orderBy: ['updatedAt', 'desc'], limit: 200 });
+  const rows = tab === 'open' ? openRows : closedRows;
+  const list = (rows || []).filter((w) => (!typeF || w.type === typeF) && includesAny([w.no, w.plate, w.customer, w.model, w.serial], q)).sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  const { shown, pager, reset } = usePaged(list, 12);
+  const isLate = (w: Worksheet) => w.status !== 'closed' && daysSince(w.statusSince) > general.overdueDays;
+  const month = today().slice(0, 7);
+  const o = openRows || [];
   return (
     <>
-      <div className="pagehead">
-        <div><h1>工作表</h1><p>点一行展开；点工作表号打开详情</p></div>
-        {can('ws.create') && <Link className="btn" to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
-      </div>
-      <section className="card tight">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', padding: '10px 10px 14px' }}>
-          <div className="seg" role="tablist">
-            <button type="button" role="tab" aria-selected={tab === 'open'} className={tab === 'open' ? 'on' : ''} onClick={() => setTab('open')}>进行中</button>
-            <button type="button" role="tab" aria-selected={tab === 'closed'} className={tab === 'closed' ? 'on' : ''} onClick={() => setTab('closed')}>已结案</button>
+      <PageHero label="工作表"
+        kicker={<span className="datechip">点卡片的 ＋ 展开零件，点「打开工作表」看详情</span>}
+        title={<>全部<br />工作表</>}
+        actions={can('ws.create') && <Link className="btn" to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
+        side={<GlassStat title="概况" items={[
+          { n: o.length, unit: '张', label: '进行中', onClick: () => { setTab('open'); reset(); }, on: tab === 'open' },
+          { n: o.filter((w) => w.waitingParts).length, unit: '张', label: '有零件待料', tone: o.some((w) => w.waitingParts) ? 'amber' : undefined },
+          { n: o.filter(isLate).length, unit: '张', label: '超时', tone: o.some(isLate) ? 'red' : undefined },
+          { n: (closedRows || []).filter((w) => w.updatedAt?.slice(0, 7) === month).length, unit: '张', label: '本月结案', onClick: () => { setTab('closed'); reset(); }, on: tab === 'closed' },
+        ]} />}
+      />
+      <DarkZone label="工作表列表" bar={<>
+        <DSeg value={tab} onChange={(k) => { setTab(k); reset(); setOpenId(null); }} tabs={[{ k: 'open', l: '进行中', n: o.length }, { k: 'closed', l: '已结案' }]} />
+        <FSelect label="类型" value={typeF} onChange={(v) => { setTypeF(v); reset(); }} all="全部类型" options={WS_TYPES.map((t) => ({ v: t.key, l: t.label }))} />
+        <DSearch value={q} onChange={(v) => { setQ(v); reset(); }} placeholder="搜索车牌、顾客、工作表号" />
+        {can('ws.create') && <LimeAdd to="/worksheets/new" label="新建工作表" />}
+        {pager}
+      </>}>
+        {!rows ? <Loading /> : shown.length === 0 ? <p className="kd" style={{ margin: 0 }}>没有符合的工作表</p> : (
+          <div className="wgrid">
+            {shown.map((w) => <WsCard key={w.id} w={w} late={isLate(w)} open={openId === w.id} onToggle={() => setOpenId(openId === w.id ? null : w.id)}
+              extra={<a className="btn ghost" href={`/worksheets/${w.id}/print`} target="_blank" rel="noreferrer"><Icon name="print" />打印</a>} />)}
           </div>
-          <label className="searchbox" style={{ maxWidth: 320, height: 40 }}><Icon name="search" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索车牌、顾客、工作表号" aria-label="搜索工作表" /></label>
-        </div>
-        {!rows ? <Loading /> : (
-          <ExpandList rows={list} cols="minmax(0,1fr) minmax(0,1.8fr) minmax(0,1fr) minmax(0,0.8fr)" head={['车牌 / 单号', '顾客 · 型号', '状态', '天数']}
-            summary={(w) => {
-              const s = statusOf(statuses, w.status);
-              return <>
-                <Two a={w.plate ? <span className="plate">{w.plate}</span> : w.no} b={w.plate ? w.no : wsTypeLabel(w.type)} />
-                <Two a={w.customer} b={w.model} />
-                <span><StatusPill s={s} /></span>
-                <span className="num">{w.status === 'closed' ? fmtDate(w.updatedAt) : `${daysSince(w.statusSince)} 天`}</span>
-              </>;
-            }}
-            detail={(w) => <>
-              <dl className="dgrid">
-                <div><dt>类型</dt><dd>{wsTypeLabel(w.type)}</dd></div>
-                <div><dt>负责维修员</dt><dd>{w.assigneeName || '未派工'}</dd></div>
-                <div><dt>零件</dt><dd>{w.partsCount || 0} 项{w.waitingParts ? `（${w.waitingParts} 项待料）` : ''}</dd></div>
-                <div><dt>建立</dt><dd>{fmtDate(w.createdAt)} · {w.createdByName}</dd></div>
-                {w.source && <div style={{ gridColumn: '1 / -1' }}><dt>来源</dt><dd>{w.source.label}</dd></div>}
-              </dl>
-              <div className="chips"><Link className="btn sm" to={`/worksheets/${w.id}`}>打开工作表</Link><a className="btn ghost sm" href={`/worksheets/${w.id}/print`} target="_blank" rel="noreferrer"><Icon name="print" />打印 / PDF</a></div>
-            </>}
-          />
         )}
-      </section>
+      </DarkZone>
     </>
   );
 }

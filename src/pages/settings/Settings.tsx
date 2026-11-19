@@ -1,5 +1,6 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useApp } from '../../lib/app';
+import { PageHero } from '../../components/glass';
 import Display from './Display';
 import Fields from './Fields';
 import General from './General';
@@ -18,7 +19,7 @@ export default function Settings() {
   const admin = can('settings.edit') || can('users.edit');
   return (
     <>
-      <h1>设置</h1>
+      <PageHero label="设置" photo={false} title={<>系统<br />设置</>} sub="字段、零件位置、工作状态、人员权限、公司资料、显示与连接" />
       <div className="row">
         <nav aria-label="设置分类" className="card" style={{ flex: '1 1 200px', maxWidth: '100%', padding: 8, gap: 2, borderRadius: 20 }}>
           {ITEMS.filter(([k]) => admin || k === 'display').map(([k, l]) => (
