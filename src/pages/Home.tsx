@@ -127,7 +127,7 @@ export default function Home() {
             <span className="datechip">{fmtMD(t0)} · {fmtWeekday(t0)}</span>
             <span className="k">{hello}，{staff!.name} · {data?.summary ?? '载入中'}</span>
           </div>
-          <h1>今日<br />工作</h1>
+          <h1 data-i18n-join="">今日<br />工作</h1>
           {(role === 'admin' || role === 'warehouse') && <Link className="btn" style={{ alignSelf: 'flex-start' }} to="/worksheets/new"><Icon name="plus" />新建工作表</Link>}
           <section className="card" aria-label="本周结案趋势" style={{ maxWidth: 380 }}>
             <Fold />

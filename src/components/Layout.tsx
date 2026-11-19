@@ -99,7 +99,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </Link>
           <NavLink className={({ isActive }) => `iconbtn ${isActive ? 'on' : ''}`} to="/settings" aria-label={t('设置')}><Icon name="set" /></NavLink>
           <details className="usermenu" ref={menuRef}>
-            <summary aria-label={`${staff?.name || ''} · 账号`}><span className="avatar sm me-avatar">{initial(staff?.name)}</span></summary>
+            <summary aria-label={`${staff?.name || ''} · 账号`}><span className="avatar notranslate sm me-avatar">{initial(staff?.name)}</span></summary>
             <div className="menu">
               <div className="two"><b className="ell">{staff?.name}</b><span>{t(roleLabel(role || ''))}{DEMO ? ' · 示范' : ''}</span></div>
               <Link className="btn ghost sm" to="/settings/display"><Icon name="moon" />{t('显示与语言')}</Link>

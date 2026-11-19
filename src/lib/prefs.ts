@@ -35,6 +35,7 @@ export function applyPrefs(p: Prefs = current) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.size = p.large ? 'large' : 'normal';
   document.documentElement.lang = p.lang === 'zh' ? 'zh-Hans' : p.lang;
+  window.dispatchEvent(new CustomEvent('prefs-changed'));
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'glass' ? '#0E3059' : dark ? '#0A0A0B' : '#F4F4F2');
 }
 export const getPrefs = () => current;

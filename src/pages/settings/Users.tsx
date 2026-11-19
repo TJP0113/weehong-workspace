@@ -49,7 +49,7 @@ export default function Users() {
           </div>
           <ExpandList rows={list} cols="minmax(0,1.6fr) minmax(0,1fr) minmax(0,0.7fr)" head={['姓名', '角色', '状态']}
             summary={(u) => <>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, opacity: u.active ? 1 : 0.55 }}><span className="avatar sm">{initial(u.name)}</span><b className="ell">{u.name}</b></span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, opacity: u.active ? 1 : 0.55 }}><span className="avatar notranslate sm">{initial(u.name)}</span><b className="ell">{u.name}</b></span>
               <span><span className="tag">{roleLabel(u.role)}</span></span>
               <span><Pill tone={u.active ? 'green' : 'grey'}>{u.active ? '使用中' : '已停用'}</Pill></span>
             </>}

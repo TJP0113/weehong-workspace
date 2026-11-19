@@ -7,9 +7,11 @@ import { registerSW } from './lib/notify';
 import { applyPrefs } from './lib/prefs';
 import { UiProvider } from './components/ui';
 import './styles.css';
+import { startAutoTranslate } from './lib/autoTranslate';
 
 applyPrefs();
 window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyPrefs());
+startAutoTranslate();
 if (import.meta.env.PROD) registerSW().catch(() => {});
 
 createRoot(document.getElementById('root')!).render(

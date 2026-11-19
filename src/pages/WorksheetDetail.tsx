@@ -191,7 +191,7 @@ export default function WorksheetDetail() {
             )}
             {!entries ? <Loading n={2} /> : entries.length === 0 ? <p className="muted">还没有维修事项</p> : entries.map((e) => (
               <article key={e.id} className="sub" style={{ display: 'flex', gap: 12 }}>
-                <div className="avatar sm">{initial(e.byName)}</div>
+                <div className="avatar notranslate sm">{initial(e.byName)}</div>
                 <div className="col" style={{ gap: 4 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'baseline' }}><b>{e.byName}</b><span className="small muted">{roleLabel(e.role)} · {fmtTime(e.at)}</span></div>
                   <p style={{ margin: 0, lineHeight: 1.6, color: 'var(--ink2)', whiteSpace: 'pre-wrap' }}>{e.text}</p>

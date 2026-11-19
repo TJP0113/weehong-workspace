@@ -94,7 +94,7 @@ export default function Rentals() {
                 const st = M_STATUS[m.status] || ['—', 'grey'];
                 return (
                   <DarkCard key={m.code} plate={m.code} title={m.name} sub={`${m.kind || ''} · ${m.client || m.location || '公司场地'}`}
-                    chips={[soon ? '快到期' : '', m.provider === 'own' ? '本公司' : `供应商${m.supplierName ? ` · ${m.supplierName}` : ''}`, m.rate ? `按${RATE_LABEL[m.rate]}` : '']}
+                    chips={[soon ? '快到期' : '', m.provider === 'own' ? '本公司' : `供应商${m.supplierName ? ` · ${m.supplierName}` : ''}`, m.rate && RATE_LABEL[m.rate] ? `按${RATE_LABEL[m.rate]}` : '']}
                     dot={`var(--${st[1]})`} meta={`${st[0]}${rented ? ` · 到 ${fmtMD(m.rentEnd)}` : m.location ? ` · ${m.location}` : ''}`}
                     ring={rented ? <Ring pct={(left / total) * 100} big={left} small="天" color={soon ? '#F0A43A' : undefined} /> : <Ring pct={0} big={st[0].replace('在', '')} small="状态" />}
                     alert={!!soon} open={openId === m.code} onToggle={() => setOpenId(openId === m.code ? null : m.code)}>

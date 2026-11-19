@@ -38,7 +38,7 @@ export default function Display() {
       </section>
       <section className="card">
         <Fold />
-        <div className="col" style={{ gap: 4 }}><h2>语言</h2><span className="k">导航和常用按钮会切换；零件名称保持 AutoCount 原文</span></div>
+        <div className="col" style={{ gap: 4 }}><h2>语言</h2><span className="k">整个界面都会切换；零件名称、顾客名称保持原文</span></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 10 }}>
           {([['zh', '中文'], ['en', 'English'], ['ms', 'Bahasa Melayu']] as [Lang, string][]).map(([k, l]) => <button key={k} type="button" role="radio" aria-checked={p.lang === k} onClick={() => { set({ lang: k }); location.reload(); }} className="choice" style={{ minHeight: 52, ...ring(p.lang === k) }}>{l}</button>)}
         </div>

@@ -16,7 +16,7 @@ export function PageHero({ kicker, title, sub, actions, photo = false, left, sid
     <section className={`hero home-hero ${photo ? '' : 'nophoto'}`} aria-label={label}>
       <div className="hero-col">
         {kicker && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>{kicker}</div>}
-        <h1>{title}</h1>
+        <h1 data-i18n-join="">{title}</h1>
         {sub && <p className="hero-sub">{sub}</p>}
         {actions && <div className="chips">{actions}</div>}
         {left}
